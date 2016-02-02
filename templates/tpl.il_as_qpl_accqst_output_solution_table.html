@@ -1,0 +1,111 @@
+<!-- BEGIN booking_table -->
+<table class="accqstBookingTable" datatable="1" cellspacing="0">
+<!-- BEGIN with_points -->
+<colgroup>
+	<col width="25%" align="left" />
+	<col width="10%" align="right" />
+	<col width="10%" align="right" />
+	<col width="10%" align="center" />
+	<col width="25%" align="left" />
+	<col width="10%" align="right" />
+	<col width="10%" align="right" />
+</colgroup>
+<!-- END with_points -->
+
+<!-- BEGIN without_points -->
+<colgroup>
+	<col width="30%" align="left" />
+	<col width="15%" align="right" />
+	<col width="10%" align="center" />
+	<col width="30%" align="left" />
+	<col width="15%" align="right" />
+</colgroup>
+<!-- END without_points -->
+
+<!-- BEGIN table_title -->
+<tr>
+	<td colspan="{TITLE_COLSPAN}">
+		<table width="100%" datatable="0" cellspacing="0">
+		<col width="33%" align="left" />
+		<col width="33%" aligh="center" />
+		<col width="33%" aligh="right" />
+		<tr class="accqstBookingTableTitle">
+			<td class="accqstLeft">{TXT_TITLE_LEFT}</td>
+			<td class="accqstCenter">{TXT_TITLE_CENTER}</td>
+			<td class="accqstRight">{TXT_TITLE_RIGHT}</td>
+		</tr>		
+		</table>
+	</td>
+</tr>
+<!-- END table_title -->	
+
+<!-- BEGIN booking_record -->
+
+<!-- BEGIN head_row -->
+<tr class="accqstBookingTableRowHead">
+	<th class="accqstAccount">{TXT_ACCOUNT}</th>
+	<th class="accqstValue">{TXT_VALUE}</th>
+	<!-- BEGIN left_points_head -->
+	<th class="accqstPoints">{TXT_LEFT_POINTS}</th>
+	<!-- END left_points_head -->
+	<th class="accqstCenter"></th>
+	<th class="accqstAccount">{TXT_ACCOUNT}</th>
+	<th class="accqstValue">{TXT_VALUE}</th>
+	<!-- BEGIN right_points_head -->
+	<th class="accqstPoints">{TXT_RIGHT_POINTS}</th>
+	<!-- END right_points_head -->
+</tr>
+<!-- END head_row -->
+
+
+<!-- BEGIN booking_row -->
+<tr class="accqstBookingTableRow">
+	<td class="accqstAccount"><div class="accqstInput">{LEFT_ACCOUNT}&nbsp;</div></td>
+	<td class="accqstValue"><div class="accqstInput">{LEFT_VALUE}&nbsp;</div></td>
+	<!-- BEGIN left_points_row -->
+	<td class="accqstPoints">{LEFT_POINTS}</td>
+	<!-- END left_points_row -->
+	<td class="accqstCenter"></td>
+	<td class="accqstAccount"><div class="accqstInput">{RIGHT_ACCOUNT}&nbsp;</div></td>
+	<td class="accqstValue"><div class="accqstInput">{RIGHT_VALUE}&nbsp;</div></td>
+	<!-- BEGIN right_points_row -->
+	<td class="accqstPoints">{RIGHT_POINTS}</td>
+	<!-- END right_points_row -->
+</tr>
+<!-- END booking_row -->
+
+<!-- BEGIN sum_row -->
+<tr class="accqstBookingTableFoot">
+	<td class="accqstAccount">{TXT_SUM}</td>
+	<td class="accqstValue">{SUM_VALUES_LEFT}</td>
+	<!-- BEGIN left_points_sum -->
+	<td class="accqstPoints">{SUM_POINTS_LEFT}</td>
+	<!-- END left_points_sum -->
+	<td class="accqstCenter"></td>
+	<td class="accqstAccount">{TXT_SUM}</td>
+	<td class="accqstValue">{SUM_VALUES_RIGHT}</td>
+	<!-- BEGIN right_points_sum -->
+	<td class="accqstPoints">{SUM_POINTS_RIGHT}</td>
+	<!-- END right_points_sum -->
+</tr>
+<!-- END sum_row -->
+
+<!-- BEGIN record_scoring_row -->
+<tr class="accqstBookingTableScoring">
+	<td class="accqstRecordScoring" colspan="7">{TXT_RECORD_SCORING} {VALUE_RECORD_SCORING}</td>
+</tr>
+<!-- END record_scoring_row -->
+
+<!-- END booking_record -->	
+</table>
+<!-- END booking_table -->
+
+<!-- BEGIN additional_scoring -->
+<table class="accqstScoringTable">
+<!-- BEGIN additional_scoring_row -->
+<tr>
+	<td>{TXT_ADDITIONAL_SCORING} {VALUE_ADDITIONAL_SCORING}</td>
+</tr>
+<!-- END additional_scoring_row -->	
+</table>
+<!-- END additional_scoring -->

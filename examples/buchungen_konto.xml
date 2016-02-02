@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<konto
+        links="S"
+        mitte="Kasse"
+        rechts="H"
+        zeilen="5"
+        summen_zeigen="0"
+        bonus_reihe_links="1"
+        bonus_reihe_rechts="1"
+        malus_anzahl_links="1"
+        malus_anzahl_rechts="1"
+        malus_summen="1"
+        >
+    <links 	konto="800" betrag="24,5" punkte="1" />
+    <links 	konto="801" betrag="25,5" punkte="1" />
+    <rechts konto="300" betrag="10" punkte="1" />
+    <rechts konto="301" betrag="10" punkte="1" />
+    <rechts konto="303" betrag="30" punkte="1" />
+</konto>

@@ -1,0 +1,59 @@
+//
+// Copyright (c) 2013 Institut für Lern-Innovation, Friedrich-Alexander-Universität Erlangen-Nürnberg 
+// GPLv2, see LICENSE 
+// 
+// German Language File for assAccountingQuestion Plugin
+//
+
+<!-- language file start -->
+assAccountingQuestion#:#Buchungsfrage
+add_booking#:#Buchungstabelle hinzufügen
+accounts_file#:#Kontenrahmen-Definition hochladen
+accounting_table#:#Buchungstabelle
+position#:#Position
+booking_file#:#Buchungs-Definition hochladen
+question_part#:#Teilfrage
+position_info#:#Mit der Position legen Sie die Reihenfolge der Buchungstabellen fest. Lassen Sie das Feld leer,wenn sie eine neue Tabelle am Ende anfügen.
+xml_error#:#Die XML-Definition ist feherhaft!
+delete_accounting_table#:#Buchungstabelle löschen
+part_deleted#:#Die Buchungstabelle wurde gelöscht
+part_not_deleted#:#Die Buchungstabelle konnte nicht gelöscht werden
+edit#:#Bearbeiten
+download#:#Herunterladen
+edit_accounts#:#Kontenrahmen bearbeiten
+edit_booking#:#Buchungstabelle bearbeiten
+definition#:#Definition
+xml_accounts_error#:#Die Kontenrahmen-Definition ist fehlerhaft!
+xml_booking_error#:#Die Buchungs-Definition %s ist fehlerhaft!
+accounts_saved#:#Der Kontenrahmen wurde gespeichert.
+booking_saved#:#Die Buchungs-Definition wurde gespeichert.
+point#:#Punkt
+points#:#Punkte
+booking_account#:#Konto
+money_value#:#Betrag
+label_sum#:#Summe
+bonusOrderLeft#:#Bonus korrekte Reihenfolge links
+bonusOrderRight#:#Bonus korekte Reihenfolge rechts
+malusCountLeft#:#Malus überschrittene Anzahl links
+malusCountRight#:#Malus überschrittene Anzahl rechts
+malusSumsDiffer#:#Malus ungleiche Summen
+max_score#:#Maximale Punktzahl
+reached_score#:#Erreichte Punktzahl
+t_account_center#:#Konto
+t_account_left#:#Soll
+t_account_right#:#Haben
+records_left#:#Von
+records_right#:#An
+records_center#:#Buchungen
+booking_to#:#an
+user_solution_part#:#Buchungstabelle %s: Nutzereingabe
+correct_solution_part#:#Buchungstabelle %s: korrekte Lösung
+accounts_xml#:#Kontenrahmen (XML-Definition)
+accounts_xml_info#:#Der Kontenrahmen wird für alle Buchungen in dieser Frage gemeinsam genutzt.
+booking_xml#:#Buchungen (XML-Definition)
+booking_xml_info#:#Hier werden die korrekten Buchungen und Ihre Punkte definiert.
+download_accounts_xml#:#Kontenrahmen-Definition herunterladen
+download_booking_xml#:#Buchungs-Definition herunterladen
+grading_details_note#:#Hinweis: Die Bewertungs-Details werden angezeigt, da Sie Schreibrecht haben.
+feedback_correct_solution#:#Korrekt
+feedback_user_solution#:#Eingabe

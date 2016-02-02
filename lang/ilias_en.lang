@@ -1,0 +1,59 @@
+//
+// Copyright (c) 2013 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg 
+// GPLv2, see LICENSE 
+// 
+// English Language File for assAccountingQuestion Plugin
+//
+
+<!-- language file start -->
+assAccountingQuestion#:#Accounting question
+add_booking#:#Add booking table
+accounts_file#:#Upload an accounts definition
+accounting_table#:#booking table
+position#:#Position
+booking_file#:#Upload a booking definition
+question_part#:#Partial question
+position_info#:#The position defines the order ob the booking tables. Leave this field empty if you add a new table at the end.
+xml_error#:#The XML definition is wrong!
+delete_accounting_table#:#Delete booking table
+part_deleted#:#The booking table was deleted
+part_not_deleted#:#The booking table couldn't be deleted
+edit#:#Edit
+download#:#Download
+edit_accounts#:#Edit accounts definition
+edit_booking#:#Edit booking table
+definition#:#Definition
+xml_accounts_error#:#The accounts definition is invalid!
+xml_booking_error#:# The booking definition %s is invalid!
+accounts_saved#:#The accounts defnition was saved.
+booking_saved#:#The booking definition was saved.
+point#:#Punkt
+points#:#Points
+booking_account#:#Account
+money_value#:#Value
+label_sum#:#Sum
+bonusOrderLeft#:#Bonus for correct order on left side
+bonusOrderRight#:#Bonus for correct order on right side
+malusCountLeft#:#Malus for exceeding count on left side
+malusCountRight#:#Malus for exceeding count on right side
+malusSumsDiffer#:#Malus for non-equal sums
+max_score#:#Maximum points
+reached_score#:#Reached points
+t_account_center#:#Account
+t_account_left#:#Debit
+t_account_right#:#Credit
+records_left#:#From
+records_right#:#To
+records_center#:#Bookings
+booking_to#:#to
+user_solution_part#:#Booking table %s: User input
+correct_solution_part#:#Booking table %s: correct solution
+accounts_xml#:#Accounts XML definition
+accounts_xml_info#:#The accounts definition is used for all booking tables in this question.
+booking_xml#:#Booking XML definition
+booking_xml_info#:#This definition specifies the valid bookings and their given points. 
+download_accounts_xml#:#Download the accounts definition
+download_booking_xml#:#Upload the booking definition
+grading_details_note#:#Note: The grading details are shown because you have write permission.
+feedback_correct_solution#:#Correct solution
+feedback_user_solution#:#User solution

@@ -1,0 +1,58 @@
+<p>{QUESTION_TEXT}</p>
+<!-- BEGIN question_part -->
+<p>{PART_QUESTION_TEXT}</p>
+
+<div class="container">
+    <h2>{TABLE_NAME}</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th id="left_column_header">{FIRST_COLUMN_HEADER}</th>
+            <th id="second_column_header">{SECOND_COLUMN_HEADER}</th>
+            <th id="middle_column_header">{THIRD_COLUMN_HEADER}</th>
+            <th id="fourth_column_header">{FOURTH_COLUMN_HEADER}</th>
+            <th id="right_column_header">{FIFTH_COLUMN_HEADER}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- BEGIN accounting -->
+        <tr>
+            <td>
+                <select class="combobox ilAccqstAccount" id="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_account_left"
+                        name="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_account_left">
+                    <option></option>
+                    <!-- BEGIN accounts_left -->
+                    <option value="{ACCOUNT_VALUE}">{ACCOUNT_TEXT}</option>
+                    <!-- END accounts_left -->
+                    <option value="{SELECTED_ACCOUNT_LEFT_VALUE}" selected>{SELECTED_LEFT_ACCOUNT}</option>
+                </select>
+            </td>
+            <td>
+                <div class="amount_input">
+                    <input type="text" class="form-control ilAccqstAmount" aria-describedby="basic-addon1" id="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_amount_left"
+                           name="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_amount_left" value="{DEBIT_AMOUNT}" />
+                </div>
+            </td>
+            <td>{TO_COLUMN}</td>
+            <td>
+                <select class="combobox ilAccqstAccount" id="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_account_right"
+                        name="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_account_right">
+                    <option></option>
+                    <!-- BEGIN accounts_right -->
+                    <option value="{ACCOUNT_VALUE}">{ACCOUNT_TEXT}</option>
+                    <!-- END accounts_right -->
+                    <option value="{SELECTED_ACCOUNT_RIGHT_VALUE}" selected>{SELECTED_RIGHT_ACCOUNT}</option>
+                </select>
+            </td>
+            <td>
+                <div class="amount_input">
+                    <input type="text" class="form-control ilAccqstAmount" aria-describedby="basic-addon1" id="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_amount_right"
+                           name="q_{QUESTION_ID}_part_{QUESTION_PART}_row_{ROW}_amount_right" value="{CREDIT_AMOUNT}" />
+                </div>
+            </td>
+        </tr>
+        <!-- END accounting -->
+    </table>
+
+</div>
+<!-- END question_part -->

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<konten anzeige = "beide">
+	<konto nummer="800" titel="AB" />
+    <konto nummer="801" titel="SB" />
+	<konto nummer="300" titel="Bank" />
+	<konto nummer="301" titel="Kasse" />
+	<konto nummer="303" titel="äöüÄÖÜß" />
+</konten>

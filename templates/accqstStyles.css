@@ -1,0 +1,76 @@
+table.accqstBookingTable {
+	width: 100%;
+	border-collapse: separate;
+}
+
+table.accqstBookingTable tr {
+	vertical-align: top;
+}
+
+tr.accqstBookingTableTitle td {
+	font-size:80%;
+	font-weight: bold;
+	border-bottom: 1px solid #000000;
+	padding: 10px 3px 3px 3px;	
+}
+
+tr.accqstBookingTableRowHead th {
+	font-size:80%;
+	font-weight: normal;
+	padding: 3px 3px 3px 3px;	
+}
+
+tr.accqstBookingTableRow td {
+	font-size:80%;
+	font-weight: normal;	
+	padding: 3px;	
+}
+
+tr.accqstBookingTableFoot td {
+	font-size:80%;
+	font-weight: normal;	
+	padding: 3px 10px 10px 6px;	
+}
+
+tr.accqstBookingTableScoring td {
+	font-size:80%;
+	padding: 3px 3px 3px 3px;	
+}
+
+.accqstAccount, .accqstLeft {text-align: left; }
+.accqstValue, .accqstRight { text-align: right; }
+.accqstPoints { text-align: right; font-style:italic;}
+.accqstCenter { text-align: center; } 
+.accqstRecordScoring { text-align: left; font-style:italic;}
+	
+
+.accqstInput {
+	witdh: 100%;
+	background-color:white;
+	border-style:inset;
+	border-width:1px;
+	color:black;
+	padding: 3px;
+}
+
+.accqstXmlInput {
+    width: 100%;
+    font-family: monospace;
+}
+
+table.accqstScoringTable {
+	margin-top: 10px;
+}
+
+table.accqstScoringTable tr td {
+	font-size:80%;
+	font-style:italic;	
+}
+
+p.accqstPartIntro {
+	margin-top: 20px;
+}
+
+p.accqstPartScore {
+	font-style: italic;
+}
