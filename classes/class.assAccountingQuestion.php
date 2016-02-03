@@ -674,19 +674,27 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @param	integer		active id of the user
 	 * @param	integer		test pass
+	 * @param	mixed		true: get authorized solution, false: get intermediate solution, null: prefer intermediate
 	 * @param	boolean		use return format prior to version 1.3.1
 	 * 						(needed for class.ilSpecificPatches::compareAccountingQuestionResults)
 	 * @return  array    	part_id => xml string (new format)
 	 */
-	public function getSolutionStored($active_id, $pass, $old_format = false)
+	public function getSolutionStored($active_id, $pass, $authorized = null, $old_format = false)
 	{
 		$solution = array();
 		$old_solution = array();
 
-		// This gets all stored solution values
-		// Due to race conditions in former ilias versions there may be more rows stored for a value
-		// The rows are sorted by primary key, so the last stored entry wins in the following assignments
-		$rows = $this->getSolutionValues($active_id, $pass);
+		if (is_null($authorized))
+		{
+			// assAccountingQuestionGUI::getTestOutput() takes the latest storage
+			$rows = $this->getUserSolutionPreferingIntermediate($active_id, $pass);
+		}
+		else
+		{
+			// other calls should explictly indicate whether to use the authorized or intermediate solutions
+			$rows = $this->getSolutionValues($active_id, $pass, $authorized);
+		}
+
 		foreach ($rows as $row)
 		{
 			// new format since 1.3.1
@@ -746,7 +754,7 @@ class assAccountingQuestion extends assQuestion
 	 * @param boolean $returndetails (deprecated !!)
 	 * @return integer/array $points/$details (array $details is deprecated !!)
 	 */
-	public function calculateReachedPoints($active_id, $pass = NULL, $returndetails = FALSE)
+	public function calculateReachedPoints($active_id, $pass = NULL,  $authorizedSolution = true, $returndetails = FALSE)
 	{
 		if ($returndetails)
 		{
@@ -760,7 +768,7 @@ class assAccountingQuestion extends assQuestion
 			$pass = $this->getSolutionMaxPass($active_id);
 		}
 
-		$solution = $this->getSolutionStored($active_id, $pass);
+		$solution = $this->getSolutionStored($active_id, $pass, $authorizedSolution);
 
 		return $this->calculateReachedPointsForSolution($solution);
 	}
@@ -816,7 +824,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @see    self::getSolutionStored()
 	 */
-	function saveWorkingData($active_id, $pass = NULL)
+	function saveWorkingData($active_id, $pass = NULL,  $authorized = true)
 	{
 		if (is_null($pass))
 		{
@@ -836,8 +844,8 @@ class assAccountingQuestion extends assQuestion
 
 		// update the solution with process log
 		$this->getProcessLocker()->requestUserSolutionUpdateLock();
-		$this->removeCurrentSolution($active_id, $pass);
-		$this->saveCurrentSolution($active_id, $pass, $value1, $value2);
+		$this->removeCurrentSolution($active_id, $pass, $authorized);
+		$this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
 		$this->getProcessLocker()->releaseUserSolutionUpdateLock();
 
 		// log the saving, we assume that values have been entered
@@ -923,7 +931,7 @@ class assAccountingQuestion extends assQuestion
 		global $lng;
 
 		include_once("./Services/Excel/classes/class.ilExcelUtils.php");
-		$solutions = $this->getSolutionStored($active_id, $pass);
+		$solutions = $this->getSolutionStored($active_id, $pass, true);
 
 		$worksheet->writeString($startrow, 0, ilExcelUtils::_convert_text($this->getPlugin()->txt($this->getQuestionType())), $format_title);
 		$worksheet->writeString($startrow, 1, ilExcelUtils::_convert_text($this->getTitle()), $format_title);

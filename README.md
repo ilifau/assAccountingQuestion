@@ -37,10 +37,11 @@ See Anleitung-Deutsch.pdf and Manual-English.pdf in docs/ for details.
 Version History
 ===============
 
-Version 1.4.0 (2016-02-02)
+Version 1.4.0 (2016-02-03)
 --------------------------
 * Initial import to GitHub
 * set ILIAS version to 5.1.x
+* fix handling of intermediate and authorized solution in ILIAS 5.1
 
 
 Version 1.3.2 (2015-12-11)	IMPORTANT BUGFIX!
