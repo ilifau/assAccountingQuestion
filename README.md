@@ -7,8 +7,8 @@ ILIAS Accounting Question plugin
 ================================
 
 Author:   Fred Neumann <fred.neumann@fim.uni-erlangen.de>
-Version:  1.3.2 (2015-12-11)
-Supports: ILIAS 5.0
+Version:  1.4.0 (2016-02-03)
+Supports: ILIAS 5.1
 
 Installation
 ------------
@@ -32,10 +32,15 @@ This plugin provides a test question type for financial booking tables
 
 See Anleitung-Deutsch.pdf and Manual-English.pdf in docs/ for details.
 
+See also: http://www.ilias.de/docu/goto_docu_cat_3463.html
 
 ===============
 Version History
 ===============
+
+* Version 1.4.0 for ILIAS 5.1 (and higher) is maintained in GitHub: https://github.com/ilifau/assAccountingQuestion
+* Former versions for ILIAS 5.0 and lower are maintained in ILIAS SVN: http://svn.ilias.de/svn/ilias/branches/fau/plugins
+
 
 Version 1.4.0 (2016-02-03)
 --------------------------
