@@ -3,9 +3,9 @@ ILIAS Accounting Question plugin
 
 Copyright (c) 2016 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
 
-Author:   Fred Neumann <fred.neumann@ili.fau.de>
-
-Website:  http://www.ilias.de/docu/goto_docu_cat_3463.html
+- Author: Fred Neumann <fred.neumann@ili.fau.de>
+- Forum: http://www.ilias.de/docu/goto_docu_frm_3474_1944.html
+- Bug Reports: http://www.ilias.de/mantis (Choose project "ILIAS plugins" and filter by category "Accounting Question")
 
 Installation
 ------------
@@ -22,10 +22,9 @@ There is nothing to configure for this plugin.
 
 Usage
 -----
-This plugin provides a test question type for financial booking tables 
-(t-accounts and booking records).
+This plugin provides a test question type for financial booking tables  (t-accounts and booking records).
 
-See Anleitung-Deutsch.pdf and Manual-English.pdf in docs/ for details.
+See [Anleitung](docs/Anleitung-Deutsch.pdf) or [Manual](docs/Manual-English.pdf) for details.
 
 Version History
 ===============
