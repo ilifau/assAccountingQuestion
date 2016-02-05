@@ -1,4 +1,4 @@
-Copyright (c) 2015 Institut fuer Lern-Innovation,
+Copyright (c) 2016 Institut fuer Lern-Innovation,
 Friedrich-Alexander-Universitaet Erlangen-Nuernberg 
 GPLv2, see LICENSE 
 
@@ -6,19 +6,18 @@ GPLv2, see LICENSE
 ILIAS Accounting Question plugin
 ================================
 
-Author:   Fred Neumann <fred.neumann@fim.uni-erlangen.de>
-Version:  1.4.0 (2016-02-03)
-Supports: ILIAS 5.1
+Author:   Fred Neumann <fred.neumann@ili.fau.de>
+
+Website:  http://www.ilias.de/docu/goto_docu_cat_3463.html
 
 Installation
 ------------
+When you download the Plugin as ZIP file from GitHub, please rename the extracted directory to *assAccountingQuestion* (remove the branch suffix, e.g. -master).
 
-1. Copy the assAccountingQuestion directory to your ILIAS installation at the followin path 
+1. Copy the assAccountingQuestion directory to your ILIAS installation at the following path 
 (create subdirectories, if neccessary):
-Customizing/global/plugins/Modules/TestQuestionPool/Questions/assAccountingQuestion
-
+Customizing/global/plugins/Modules/TestQuestionPool/Questions/
 2. Go to Administration > Plugins
-
 3. Choose "Update" for the assAccountingQuestion plugin
 4. Choose "Activate" for the assAccountingQuestion plugin
 
@@ -32,13 +31,11 @@ This plugin provides a test question type for financial booking tables
 
 See Anleitung-Deutsch.pdf and Manual-English.pdf in docs/ for details.
 
-See also: http://www.ilias.de/docu/goto_docu_cat_3463.html
-
 ===============
 Version History
 ===============
 
-* Version 1.4.0 for ILIAS 5.1 (and higher) is maintained in GitHub: https://github.com/ilifau/assAccountingQuestion
+* All versions for ILIAS 5.1 and higher are maintained in GitHub: https://github.com/ilifau/assAccountingQuestion
 * Former versions for ILIAS 5.0 and lower are maintained in ILIAS SVN: http://svn.ilias.de/svn/ilias/branches/fau/plugins
 
 
@@ -51,8 +48,9 @@ Version 1.4.0 (2016-02-03)
 
 Version 1.3.2 (2015-12-11)	IMPORTANT BUGFIX!
 --------------------------
+* http://svn.ilias.de/svn/ilias/branches/fau/plugins/assAccountingQuestion-1.3.x 
+* stable version for ILIAS 5.0
 * Fixed setting of points to 0 when test results are recalculated
-
 
 Version 1.3.1 (2015-11-23)
 --------------------------
@@ -72,14 +70,14 @@ Version 1.3.1 (2015-11-23)
 * Multiple internal cleanups.
 
 
-SVN Version 1.3.0 (2015-07-17)
-------------------------------
+Version 1.3.0 (2015-07-17)
+--------------------------
 * flash-free html5 user interface
 * result calculation in php (instead of flash)
 
 
-SVN Version 1.2.1 (2015-02-23)
-------------------------------
+Version 1.2.1 (2015-02-23)
+--------------------------
 * beta version for ILIAS 5.0
 * updated version number and compatibility
 * known bugs: ignored "bonus for correct order of bookings"
@@ -87,31 +85,17 @@ SVN Version 1.2.1 (2015-02-23)
 * todo: get entirely rid of Flash
 
 
-SVN Version 1.1.7 (2014-07-23)
-------------------------------
+Version 1.1.7 (2014-07-23)
+--------------------------
+* http://svn.ilias.de/svn/ilias/branches/fau/plugins/assAccountingQuestion-1.1.x 
 * stable version for ILIAS 4.4
 * support taxonomies in question pools
 * supports feedback, hints and suggested solutions
   (note:, hints and suggested solutions are not exported/imported by ILIAS 4.4)
 * supports export and import of images in the uestion text of partial questions
 
-SVN Version 1.1.0 (2014-01-08)
-------------------------------
-* alpha version for ILIAS 4.4
-
-
-SVN (2013-11-18)
-----------------
-* fixed comparing of Flash and ILIAS calculation in DEVMODE
-
-
 Version 1.0.1 (2013-08-30)
 --------------------------
+* http://svn.ilias.de/svn/ilias/branches/fau/plugins/assAccountingQuestion-1.0.x
+* stable version for ILIAS 4.3
 * fixed copy, duplicate and sync procedures
-
-
-Version 1.0.0 (2013-03-20)
-------------------------
-
-* First published version
-* Known bugs: wrong calculation of points if more booking records are in one table
