@@ -1,10 +1,7 @@
-Copyright (c) 2016 Institut fuer Lern-Innovation,
-Friedrich-Alexander-Universitaet Erlangen-Nuernberg 
-GPLv2, see LICENSE 
-
-================================
 ILIAS Accounting Question plugin
 ================================
+
+Copyright (c) 2016 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
 
 Author:   Fred Neumann <fred.neumann@ili.fau.de>
 
@@ -25,19 +22,16 @@ There is nothing to configure for this plugin.
 
 Usage
 -----
-
 This plugin provides a test question type for financial booking tables 
 (t-accounts and booking records).
 
 See Anleitung-Deutsch.pdf and Manual-English.pdf in docs/ for details.
 
-===============
 Version History
 ===============
 
 * All versions for ILIAS 5.1 and higher are maintained in GitHub: https://github.com/ilifau/assAccountingQuestion
 * Former versions for ILIAS 5.0 and lower are maintained in ILIAS SVN: http://svn.ilias.de/svn/ilias/branches/fau/plugins
-
 
 Version 1.4.0 (2016-02-03)
 --------------------------
@@ -45,15 +39,16 @@ Version 1.4.0 (2016-02-03)
 * set ILIAS version to 5.1.x
 * fix handling of intermediate and authorized solution in ILIAS 5.1
 
-
-Version 1.3.2 (2015-12-11)	IMPORTANT BUGFIX!
+Version 1.3.2 (2015-12-11)
 --------------------------
 * http://svn.ilias.de/svn/ilias/branches/fau/plugins/assAccountingQuestion-1.3.x 
 * stable version for ILIAS 5.0
-* Fixed setting of points to 0 when test results are recalculated
+* IMPORTANT BUGFIX: Fixed setting of points to 0 when test results are recalculated
 
 Version 1.3.1 (2015-11-23)
 --------------------------
+* flash-free html5 user interface
+* result calculation in php (instead of flash)
 * IMPORTANT: Multiple booking record per table are not longer supported.
              Please use multiple booking tables per question instead
 * Abandoned the settings "bestanden_ab" and "debug" in booking tables.
@@ -68,22 +63,6 @@ Version 1.3.1 (2015-11-23)
 * Replaced the textual result presentation by an html table.
 * Better output of detailed results in Excel export of evaluation data.
 * Multiple internal cleanups.
-
-
-Version 1.3.0 (2015-07-17)
---------------------------
-* flash-free html5 user interface
-* result calculation in php (instead of flash)
-
-
-Version 1.2.1 (2015-02-23)
---------------------------
-* beta version for ILIAS 5.0
-* updated version number and compatibility
-* known bugs: ignored "bonus for correct order of bookings"
-* todo: move the points calculation from Flash to PHP
-* todo: get entirely rid of Flash
-
 
 Version 1.1.7 (2014-07-23)
 --------------------------
