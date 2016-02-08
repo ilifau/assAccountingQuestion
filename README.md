@@ -3,7 +3,7 @@ ILIAS Accounting Question plugin
 
 Copyright (c) 2016 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
 
-- Author: Fred Neumann <fred.neumann@ili.fau.de>
+- Author: Fred Neumann <fred.neumann@ili.fau.de>, Jesus Copado <jesus.copado@ili.fau.de>
 - Forum: http://www.ilias.de/docu/goto_docu_frm_3474_1944.html
 - Bug Reports: http://www.ilias.de/mantis (Choose project "ILIAS plugins" and filter by category "Accounting Question")
 
