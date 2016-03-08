@@ -22,6 +22,12 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	const URL_PATH = "./Customizing/global/plugins/Modules/TestQuestionPool/Questions/assAccountingQuestion";
 
+	/**
+	 * @const	string 	URL suffix to prevent caching of css files (increase with every change)
+	 * 					Note: this does not yet work with $tpl->addJavascript()
+	 */
+	const URL_SUFFIX = "?css_version=1.3.2a";
+
 
 	var $plugin = null;
 
@@ -44,7 +50,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		if ($id >= 0) {
 			$this->object->loadFromDb($id);
 		}
-		$this->tpl->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css'), '');
+		$this->tpl->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css').self::URL_SUFFIX, '');
 	}
 
 
@@ -502,7 +508,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	{
 
 		// init the javascript support for answer input
-		$this->tpl->addCss(self::URL_PATH.'/js/combobox/css/bootstrap-combobox.css');
+		// NOTE: the own URL suffix does not work with addJavascript
+		$this->tpl->addCss(self::URL_PATH.'/js/combobox/css/bootstrap-combobox.css'.self::URL_SUFFIX);
 		$this->tpl->addJavascript(self::URL_PATH.'/js/combobox/js/bootstrap-combobox.js');
 		$this->tpl->addJavascript(self::URL_PATH.'/js/ilAccountingQuestion.js');
 		$this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:false});');
