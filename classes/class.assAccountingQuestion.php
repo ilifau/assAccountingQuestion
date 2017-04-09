@@ -494,6 +494,8 @@ class assAccountingQuestion extends assQuestion
 			return false;
 		}
 
+		$display = (string) $xml['anzeige'];
+
 		// init accounts data (not yed saved in db)
 		$data[] = array();
 
@@ -525,7 +527,12 @@ class assAccountingQuestion extends assQuestion
 		// set the values if ok
 		if ($a_set) {
 			$this->accounts_data = $data;
-			$this->accounts_display = (string)$xml['anzeige'];
+			$this->accounts_display = $display;
+		}
+		else
+		{
+			$this->accounts_data = array();
+			$this->accounts_display = "beide";
 		}
 
 		return true;
@@ -542,7 +549,7 @@ class assAccountingQuestion extends assQuestion
 		if (!isset($this->accounts_data)) {
 			$this->analyzeAccountsXML($this->getAccountsXML(), true);
 		}
-		return $this->accounts_data;
+		return (array) $this->accounts_data;
 	}
 
 
@@ -842,11 +849,11 @@ class assAccountingQuestion extends assQuestion
 		$value1 = 'accqst_input';						// key to idenify the storage format
 		$value2 = implode('<partBreak />', $inputs);	// concatenated xml inputs for all parts
 
-		// update the solution with process log
-		$this->getProcessLocker()->requestUserSolutionUpdateLock();
-		$this->removeCurrentSolution($active_id, $pass, $authorized);
-		$this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
-		$this->getProcessLocker()->releaseUserSolutionUpdateLock();
+		// update the solution with process lock
+        $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(function() use ($active_id, $pass, $authorized, $value1, $value2) {
+            $this->removeCurrentSolution($active_id, $pass, $authorized);
+            $this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
+        });
 
 		// log the saving, we assume that values have been entered
 		include_once("./Modules/Test/classes/class.ilObjAssessmentFolder.php");
@@ -868,7 +875,7 @@ class assAccountingQuestion extends assQuestion
 	 * @param integer $pass
 	 * @param boolean $obligationsAnswered
 	 */
-	protected function reworkWorkingData($active_id, $pass, $obligationsAnswered)
+	protected function reworkWorkingData($active_id, $pass, $obligationsAnswered, $authorized)
 	{
 		// nothing to rework!
 	}
@@ -914,27 +921,17 @@ class assAccountingQuestion extends assQuestion
 		return $text;
 	}
 
-	/**
-	 * Creates an Excel worksheet for the detailed cumulated results of this question
-	 *
-	 * @param object $worksheet Reference to the parent excel worksheet
-	 * @param object $startrow Startrow of the output in the excel worksheet
-	 * @param object $active_id Active id of the participant
-	 * @param object $pass Test pass
-	 * @param object $format_title Excel title format
-	 * @param object $format_bold Excel bold format
-	 * @param array $eval_data Cumulated evaluation data
-	 * @access public
-	 */
-	public function setExportDetailsXLS(&$worksheet, $startrow, $active_id, $pass, &$format_title, &$format_bold)
+    /**
+     * {@inheritdoc}
+     */
+	public function setExportDetailsXLS($worksheet, $startrow, $active_id, $pass)
 	{
 		global $lng;
 
-		include_once("./Services/Excel/classes/class.ilExcelUtils.php");
-		$solutions = $this->getSolutionStored($active_id, $pass, true);
+        $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(0) . $startrow, $this->plugin->txt($this->getQuestionType()));
+        $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(1) . $startrow, $this->getTitle());
 
-		$worksheet->writeString($startrow, 0, ilExcelUtils::_convert_text($this->getPlugin()->txt($this->getQuestionType())), $format_title);
-		$worksheet->writeString($startrow, 1, ilExcelUtils::_convert_text($this->getTitle()), $format_title);
+		$solutions = $this->getSolutionStored($active_id, $pass, true);
 
 		$row = $startrow + 1;
 		$part = 1;
@@ -942,7 +939,8 @@ class assAccountingQuestion extends assQuestion
 		{
 			$part_id = $part_obj->getPartId();
 
-			$worksheet->writeString($row++, 0, ilExcelUtils::_convert_text($this->getPlugin()->txt('accounting_table') . ' ' . $part), $format_bold);
+            $worksheet->setCell($row, 0, $this->getPlugin()->txt('accounting_table') . ' ' . $part);
+            $worksheet->setBold($worksheet->getColumnCoord(0) . $row);
 
 			// the excel fields can be filled from the stored input
 			$part_obj->analyzeWorkingXMl($solutions[$part_id]);
@@ -952,8 +950,8 @@ class assAccountingQuestion extends assQuestion
 			$point = $this->plugin->txt('point');
 			$points = $this->plugin->txt('points');
 
-			$worksheet->writeString($row, 1, ilExcelUtils::_convert_text($data['headerLeft']));
-			$worksheet->writeString($row, 2, ilExcelUtils::_convert_text($data['headerRight']));
+            $worksheet->setCell($row, 1, $data['headerLeft']);
+            $worksheet->setCell($row, 2, $data['headerRight']);
 			$row++;
 
 			foreach($data['record']['rows'] as $r)
@@ -961,8 +959,8 @@ class assAccountingQuestion extends assQuestion
 				$left =  $r['leftAccountText'] . ' ' . $r['leftValueRaw']. ' ('. $r['leftPoints']. ' '. ($r['leftPoints'] == 1 ? $point : $points) . ')';
 				$right =  $r['rightAccountText'] . ' ' . $r['rightValueRaw']. ' ('. $r['rightPoints']. ' '. ($r['rightPoints'] == 1 ? $point : $points) . ')';
 
-				$worksheet->writeString($row, 1, ilExcelUtils::_convert_text($left));
-				$worksheet->writeString($row, 2, ilExcelUtils::_convert_text($right));
+                $worksheet->setCell($row, 1, $left);
+                $worksheet->setCell($row, 2, $right);
 				$row++;
 			}
 
@@ -970,9 +968,8 @@ class assAccountingQuestion extends assQuestion
 			{
 				if($data['record'][$key] != 0)
 				{
-					$worksheet->writeString($row, 1, ilExcelUtils::_convert_text($this->plugin->txt($key)));
-					$worksheet->writeString($row, 2, ilExcelUtils::_convert_text($data['record'][$key] .' '
-						. (abs($data['record'][$key]) == 1 ? $point : $points)));
+                    $worksheet->setCell($row, 1, $this->plugin->txt($key));
+                    $worksheet->setCell($row, 2, $data['record'][$key] .' ' . (abs($data['record'][$key]) == 1 ? $point : $points));
 					$row++;
 				}
 			}

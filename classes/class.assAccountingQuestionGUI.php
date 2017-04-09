@@ -14,6 +14,7 @@ include_once "./Modules/Test/classes/inc.AssessmentConstants.php";
  * @version    $Id: $
  * @ingroup    ModulesTestQuestionPool
  * @ilCtrl_isCalledBy assAccountingQuestionGUI: ilObjQuestionPoolGUI, ilObjTestGUI
+ * @ilCtrl_Calls assAccountingQuestionGUI: ilFormPropertyDispatchGUI
  * */
 class assAccountingQuestionGUI extends assQuestionGUI
 {
@@ -26,7 +27,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * @const	string 	URL suffix to prevent caching of css files (increase with every change)
 	 * 					Note: this does not yet work with $tpl->addJavascript()
 	 */
-	const URL_SUFFIX = "?css_version=1.3.2a";
+	const URL_SUFFIX = "?css_version=1.5.0";
 
 
 	var $plugin = null;
