@@ -1,7 +1,7 @@
 ILIAS Accounting Question plugin
 ================================
 
-Copyright (c) 2016 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
+Copyright (c) 2018 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
 
 - Author: Fred Neumann <fred.neumann@ili.fau.de>, Jesus Copado <jesus.copado@ili.fau.de>
 - Forum: http://www.ilias.de/docu/goto_docu_frm_3474_1944.html
@@ -28,10 +28,12 @@ See [Anleitung](docs/Anleitung-Deutsch.pdf) or [Manual](docs/Manual-English.pdf)
 
 Version History
 ===============
-
+* Version 1.7.0 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5.0 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
-* Version 1.4.0 for ILIAS 5.1 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master
-* Former versions for ILIAS 5.0 and lower are maintained in http://svn.ilias.de/svn/ilias/branches/fau/plugins
+
+Version 1.7.0 (2018-09-17)
+--------------------------
+* Updated for ILIAS 5.3
 
 Version 1.5.0 (2017-04-09)
 --------------------------
