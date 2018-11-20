@@ -31,7 +31,6 @@ Version History
 
 * Version 1.5.0 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 * Version 1.4.0 for ILIAS 5.1 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master
-* Former versions for ILIAS 5.0 and lower are maintained in http://svn.ilias.de/svn/ilias/branches/fau/plugins
 
 Version 1.5.0 (2017-04-09)
 --------------------------
