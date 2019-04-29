@@ -26,23 +26,25 @@ abstract class ilAccqstVariable
     /**
      * Get variables from an XML definition
      * @param   string
-     * @return self[]|null  (indexed by name)
+     * @param   ilassAccountingQuestionPlugin
+     * @return self[]  (indexed by name)
+     * @throws ilException
      */
-    public static function getVariablesFromXmlCode($xml)
+    public static function getVariablesFromXmlCode($xml, $plugin)
     {
         $variables = [];
 
         $xml = @simplexml_load_string($xml);
         if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables'))
         {
-            return null;
+            throw new ilException($plugin->txt('missing_element_variables'));
         }
 
         foreach ($xml->children() as $element)
         {
             if ($element->getName() != 'var' || empty($element['name']))
             {
-                return null;
+                throw new ilException($plugin->txt('missing_var_or_name'));
             }
             $name = (string) $element['name'];
             $type = (string) $element['type'];
@@ -50,21 +52,23 @@ abstract class ilAccqstVariable
             if (isset($variables[$name]))
             {
                 // variable is already defined
-                return null;
+                throw new ilException(sprintf($plugin->txt('double_variable_definition', $name)));
             }
 
             switch ($type)
             {
                 case self::TYPE_RANGE:
-                    $variables[$name] = ilAccqstRangeVar::getFromXmlElement($element);
+                    $variable = ilAccqstRangeVar::getFromXmlElement($element, $plugin);
                     break;
                 case self::TYPE_SELECT:
-                    $variables[$name] = ilAccqstSelectVar::getFromXmlElement($element);
+                    $variable = ilAccqstSelectVar::getFromXmlElement($element, $plugin);
                     break;
                 default:
                     // unknown type
-                    return null;
+                    throw new ilException($plugin->txt(sprintf('unknown_variable_type', $name)));
             }
+
+            $variables[$name] = $variable;
         }
 
         return $variables;
@@ -75,9 +79,11 @@ abstract class ilAccqstVariable
      * Get a variable definition from an XML element
      * (null in case of parse error)
      * @param SimpleXMLElement $element
-     * @return self|null
+     * @param ilassAccountingQuestionPlugin $plugin
+     * @return self
+     * @throws ilException
      */
-    public static function getFromXmlElement(SimpleXMLElement $element)
+    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
     {
         return null;
     }

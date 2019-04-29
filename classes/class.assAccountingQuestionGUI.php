@@ -188,7 +188,19 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 		$form->addItem($item);
 
-		// add the existing booking parts
+
+        // variables XML definition
+        $item = new ilCustomInputGUI($this->plugin->txt('variables_xml'));
+        $item->setInfo($this->plugin->txt('variables_xml_info'));
+        $tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_edit_xml.html');
+        $tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($this->object->getVariablesXML()));
+        $tpl->setVariable("NAME", 'variables_xml');
+        $tpl->setVariable("DUMP", print_r($this->object->getVariables(), true));
+        $item->setHTML($tpl->get());
+        $form->addItem($item);
+
+
+        // add the existing booking parts
 		$parts = $this->object->getParts();
 		$i = 1;
 		foreach ($parts as $part_obj) {
@@ -335,10 +347,21 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 			// check the accounts definition but save it anyway
 			if (!$this->object->analyzeAccountsXML($accounts_xml, false)) {
-				$error .= sprintf($this->plugin->txt('xml_accounts_error'));
+				$error .= $this->plugin->txt('xml_accounts_error');
 			}
 			$this->object->setAccountsXML($accounts_xml);
 
+
+			// get and check the variables XML
+            $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
+            if (!empty($variables_xml))
+			{
+				if(!$this->object->analyzeVariablesXML($variables_xml, false))
+                {
+                    $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
+                }
+            }
+			$this->object->setVariablesXML($variables_xml);
 
 			// sort the part positions
 			$positions = array();

@@ -15,29 +15,31 @@ class ilAccqstRangeVar extends ilAccqstVariable
     public $max;
 
     /** @var string step for creating values between min and max */
-    public $step;
+    public $step = 1;
 
 
     /**
      * Get a variable definition from an XML element
      * (null in case of parse error)
      * @param SimpleXMLElement $element
-     * @return self|null
+     * @param ilassAccountingQuestionPlugin $plugin
+     * @return self
+     * @throws ilException
      */
-    public static function getFromXmlElement(SimpleXMLElement $element)
+    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
     {
         $var = new self((string) $element['name']);
 
         if (empty($element['min']) || empty($element['max']))
         {
-            return null;
+            throw new ilException(sprintf($plugin->txt('missing_min_max'), $var->name));
         }
 
-        $var->min = $element['min'];
-        $var->max = $element['max'];
+        $var->min = (string) $element['min'];
+        $var->max = (string) $element['max'];
         if (!empty($element['step']))
         {
-            $var->step = $element['step'];
+            $var->step = (string) $element['step'];
         }
 
         return $var;

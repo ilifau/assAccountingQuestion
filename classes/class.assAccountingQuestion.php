@@ -50,6 +50,27 @@ class assAccountingQuestion extends assQuestion
 	private $accounts_display = 'both'; // 'number', 'title', 'both'
 
 
+    /**
+     * XML representation of variables definitions
+     * (stored in the DB)
+     * @var string
+     */
+    private $variables_xml = '';
+
+    /**
+	 * Random variables of the question
+	 * Is set implictly by setVariablesXML()
+     * @var ilAccqstVariable[]
+     */
+	private $variables = array();
+
+    /**
+	 * Error from analyze functions
+     * @var string
+     */
+	private $analyze_error = '';
+
+
 	/**
 	 * ilAccountingQuestion constructor
 	 *
@@ -76,8 +97,9 @@ class assAccountingQuestion extends assQuestion
 		// init the plugin object
 		$this->getPlugin();
 
-		// include the parts class
+		// include the needed classes
 		$this->plugin->includeClass('class.assAccountingQuestionPart.php');
+        $this->plugin->includeClass('variables/class.ilAccqstVariable.php');
 	}
 
 	/**
@@ -106,6 +128,14 @@ class assAccountingQuestion extends assQuestion
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Get the analyzing error message
+	 */
+	public function getAnalyzeError()
+	{
+		return $this->analyze_error;
 	}
 
 	/**
@@ -148,7 +178,8 @@ class assAccountingQuestion extends assQuestion
 			),
 			array(
 				'question_fi' => array('integer', $ilDB->quote($this->getId(), 'integer')),
-				'account_hash' => array('text', $hash)
+				'account_hash' => array('text', $hash),
+				'variables_def' => array('clob', $this->getVariablesXML())
 			)
 		);
 
@@ -196,13 +227,19 @@ class assAccountingQuestion extends assQuestion
 		} catch (ilTestQuestionPoolException $e) {
 		}
 
+		// get the question data
+        $result = $ilDB->query(
+            "SELECT account_hash, variables_def FROM il_qpl_qst_accqst_data "
+            . " WHERE question_fi =" . $ilDB->quote($question_id, 'integer'));
+        $data = $ilDB->fetchAssoc($result);
 
-		// get the hash value for accounts definition
+        $hash = $data['account_hash'];
+        $this->setVariablesXML($data['variables_def']);
+
+        // get the hash value for accounts definition
 		$result = $ilDB->query(
-			"SELECT h.data FROM il_qpl_qst_accqst_data d"
-			. " INNER JOIN il_qpl_qst_accqst_hash h ON d.account_hash = h.hash"
-			. " WHERE d.question_fi ="
-			. $ilDB->quote($question_id, 'integer'));
+			"SELECT data FROM il_qpl_qst_accqst_hash "
+			. " WHERE hash =" . $ilDB->quote($hash, 'text'));
 
 		$data = $ilDB->fetchAssoc($result);
 		$this->setAccountsXML($data["data"]);
@@ -611,7 +648,64 @@ class assAccountingQuestion extends assQuestion
 	}
 
 
-	/**
+    /**
+	 * Analyze the variables XML definition
+     * @param string $a_variables_xml	code
+     * @param bool $a_set			set the variables
+	 * @return bool					definition is ok
+     */
+	public function analyzeVariablesXML($a_variables_xml, $a_set = true)
+	{
+		try
+		{
+            $variables = ilAccqstVariable::getVariablesFromXmlCode($a_variables_xml, $this->plugin);
+		}
+		catch (Exception $e)
+		{
+			$this->analyze_error = $e->getMessage();
+			return false;
+		}
+
+		if ($a_set)
+		{
+			$this->variables = $variables;
+		}
+		return true;
+	}
+
+    /**
+     * set the variables definitions from XML
+     *
+     * @param    string    xml definition of the variables
+     */
+    public function setVariablesXML($a_variables_xml)
+    {
+        $this->variables_xml = $a_variables_xml;
+        $this->analyzeVariablesXML($a_variables_xml, true);
+    }
+
+
+    /**
+     * get the variables definition as XML
+     *
+     * @return    string    xml definition of the variables
+     */
+    public function getVariablesXML()
+    {
+        return $this->variables_xml;
+    }
+
+    /**
+	 * Get the list of variables
+     * @return ilAccqstVariable[]
+     */
+	public function getVariables()
+	{
+		return $this->variables;
+	}
+
+
+    /**
 	 * Calculate the maximum points
 	 *
 	 * This should be done whenever a part or booking file is changed

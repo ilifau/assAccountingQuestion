@@ -57,3 +57,12 @@ download_booking_xml#:#Buchungs-Definition herunterladen
 grading_details_note#:#Hinweis: Die Bewertungs-Details werden angezeigt, da Sie Schreibrecht haben.
 feedback_correct_solution#:#Korrekt
 feedback_user_solution#:#Eingabe
+variables_xml#:#Variablen (XML-Definition)
+variables_xml_info#:#Mit Variablen können Sie Texte und Werte in der Fragenstellung und den Tabellen zufällig varieren.
+xml_variables_error#:#Die Variablen-Definition ist fehlerhaft!
+missing_element_variables#:#Das "variables"-Element fehlt!
+missing_var_or_name#:#Die Elemente in "variables" dürfen nur vom Typ "var" sein und müssen ein "name"-Attribut haben.
+double_variable_definition#:#Die Variable mit dem Namen "%s" ist doppelt definiert.
+unknown_variable_type#:#Die Variable mit dem Namen "%s" hat einen unbekannten Typ.
+missing_min_max#:#Die variable "%s" hat kein "min"- oder "max"-Attribut definiert.
+select_child_not_val#:#Die Variable "%s" darf nur "val"-Elemente enthalten.

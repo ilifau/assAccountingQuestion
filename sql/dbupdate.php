@@ -113,3 +113,16 @@
 	$ilDB->addPrimaryKey("il_qpl_qst_accqst_hash", array("hash"));
 	}
 ?>
+<#5>
+<?php
+    /*
+     * Create hash table for accounts definitions
+     */
+    if(!$ilDB->tableColumnExists('il_qpl_qst_accqst_data', 'variables_def'))
+    {
+        $ilDB->addTableColumn("il_qpl_qst_accqst_data", 'variables_def',
+            array('type' => 'clob')
+        );
+    }
+?>
+

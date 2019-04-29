@@ -17,9 +17,11 @@ class ilAccqstSelectVar extends ilAccqstVariable
      * Get a variable definition from an XML element
      * (null in case of parse error)
      * @param SimpleXMLElement $element
-     * @return self|null
+     * @param ilassAccountingQuestionPlugin $plugin
+     * @return self
+     * @throws ilException
      */
-    public static function getFromXmlElement(SimpleXMLElement $element)
+    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
     {
         $var = new self((string) $element['name']);
 
@@ -27,10 +29,10 @@ class ilAccqstSelectVar extends ilAccqstVariable
         {
             if ($child->getName() != 'val')
             {
-                return null;
+                throw new ilException(sprintf($plugin->txt('select_child_not_val'), $var->name));
             }
 
-            $values[] = (string) $element;
+            $var->values[] = (string) $child;
         }
 
         return $var;
