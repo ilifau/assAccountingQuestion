@@ -459,7 +459,7 @@ class assAccountingQuestion extends assQuestion
 			if ($part_obj->getPartId() == $a_part_id) {
 				// delete the found part
 				if ($part_obj->delete()) {
-					unset($this->parts[$part_id]);
+					unset($this->parts[$a_part_id]);
 					$this->calculateMaximumPoints();
 					$this->saveToDB('', false);
 					return true;
@@ -682,15 +682,10 @@ class assAccountingQuestion extends assQuestion
 	 * @param	integer		active id of the user
 	 * @param	integer		test pass
 	 * @param	mixed		true: get authorized solution, false: get intermediate solution, null: prefer intermediate
-	 * @param	boolean		use return format prior to version 1.3.1
-	 * 						(needed for class.ilSpecificPatches::compareAccountingQuestionResults)
-	 * @return  array    	part_id => xml string (new format)
+	 * @return  array    	part_id => xml string
 	 */
-	public function getSolutionStored($active_id, $pass, $authorized = null, $old_format = false)
+	public function getSolutionStored($active_id, $pass, $authorized = null)
 	{
-		$solution = array();
-		$old_solution = array();
-
 		if (is_null($authorized))
 		{
 			// assAccountingQuestionGUI::getTestOutput() takes the latest storage
@@ -702,14 +697,31 @@ class assAccountingQuestion extends assQuestion
 			$rows = $this->getSolutionValues($active_id, $pass, $authorized);
 		}
 
+		$userSolution = array();
 		foreach ($rows as $row)
 		{
-			// new format since 1.3.1
-			// all inputs are in one row, concatenated by '<partBreak />'
-			// @see self::saveWorkingData()
-			if ($row['value1'] == 'accqst_input')
+			$userSolution[$row['value1']] = $row['value2'];
+		}
+		return $this->getSolutionFromUserSolution($userSolution);
+	}
+
+	/**
+	 * Get the plugin format of a user solution
+	 * @param array $userSolution	value1 => value2
+	 * @return array part_id =>  xml string
+	 */
+	public function getSolutionFromUserSolution($userSolution)
+	{
+		$solution = array();
+
+		foreach ($userSolution as $value1 => $value2)
+		{
+			if ($value1 == 'accqst_input')
 			{
-				$inputs = explode('<partBreak />', $row['value2']);
+				// new format since 1.3.1
+				// all inputs are in one row, concatenated by '<partBreak />'
+				// @see self::saveWorkingData()
+				$inputs = explode('<partBreak />', $value2);
 				foreach ($inputs as $input)
 				{
 					$matches = array();
@@ -720,37 +732,26 @@ class assAccountingQuestion extends assQuestion
 					}
 				}
 			}
-
-			// former format before 1.3.1, stored from the flash input
-			// results are stored as key/value pairs
-			// format of value1 is 'accqst_key_123' with 123 being the part_id
-			// 'student' and 'correct' are textual analyses
-			// 'result' are the given points
-			$split = explode('_', $row['value1']);
-			$key = $split[1];
-			$part_id = $split[2];
-
-			switch ($key)
+			else
 			{
-				case 'input':
-					$solution[$part_id] = $row['value2'];
-					$old_solution[$part_id][$key] = $row['value2'];
-					break;
+				// former format before 1.3.1, stored from the flash input
+				// results are stored as key/value pairs
+				// format of value1 is 'accqst_key_123' with 123 being the part_id
+				// key 'input' is the user input
+				// keys 'student' and 'correct' are textual analyses, 'result' are the given points (not longer used)
+				$split = explode('_', $value1);
+				$key = $split[1];
+				$part_id = $split[2];
 
-				case 'student':
-				case 'correct':
-					$old_solution[$part_id][$key] = $row['value2'];
-					break;
-
-				case 'result':
-					$old_solution[$part_id][$key] = $row['points'];
-					break;
+				if ($key == 'input')
+				{
+					$solution[$part_id] = $value2;
+				}
 			}
 		}
 
-		return $old_format ? $old_solution : $solution;
+		return $solution;
 	}
-
 
 	/**
 	 * Calculate the points a learner has reached answering the question in a test

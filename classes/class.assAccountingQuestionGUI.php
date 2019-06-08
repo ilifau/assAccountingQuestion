@@ -684,7 +684,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 
 		// rows
-		for ($i == 0; $i < $data['showLines']; $i++)
+		for ($i = 0; $i < $data['showLines']; $i++)
 		{
 			$tpl->touchBlock('booking_row');
 		}
@@ -983,12 +983,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Returns the answer specific feedback for the question
 	 *
-	 * @param integer $active_id Active ID of the user
-	 * @param integer $pass Active pass
+	 * @param array $userSolution ($userSolution[<value1>] = <value2>)
 	 * @return string HTML Code with the answer specific feedback
 	 * @access public
 	 */
-	function getSpecificFeedbackOutput($active_id, $pass)
+	function getSpecificFeedbackOutput($userSolution)
 	{
 		global $ilAccess;
 
@@ -1009,9 +1008,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 
 		// get the user input
-		$solution = is_object($this->getPreviewSession()) ?
-			(array) $this->getPreviewSession()->getParticipantsSolution() :
-			(array) $this->object->getSolutionStored($active_id, $pass, true);
+		$solution = $this->object->getSolutionFromUserSolution($userSolution);
 
 		// get the output template
 		$template = $this->plugin->getTemplate("tpl.il_as_qpl_accqst_output_solution.html");
@@ -1045,7 +1042,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	public function setQuestionTabs()
 	{
-		global $rbacsystem, $ilTabs;
+		global $DIC;
+		$rbacsystem = $DIC->rbac()->system();
+		$ilTabs = $DIC->tabs();
 
 		$this->ctrl->setParameterByClass("ilpageobjectgui", "q_id", $_GET["q_id"]);
 		include_once "./Modules/TestQuestionPool/classes/class.assQuestion.php";
@@ -1063,14 +1062,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$ilTabs->addTarget("edit_content",
 					$this->ctrl->getLinkTargetByClass("ilAssQuestionPageGUI", "edit"),
 					array("edit", "insert", "exec_pg"),
-					"", "", $force_active);
+					"", "");
 			}
 
 			// preview
 			$this->addTab_QuestionPreview($ilTabs);
 		}
 
-		$force_active = false;
 		if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
 			$url = "";
 			if ($classname) $url = $this->ctrl->getLinkTargetByClass($classname, "editQuestion");
@@ -1080,7 +1078,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$url,
 				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
 					"parseQuestion", "saveEdit"),
-				$classname, "", $force_active);
+				$classname, "");
 		}
 
 		// add tab for question feedback within common class assQuestionGUI
