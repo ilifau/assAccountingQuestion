@@ -8,7 +8,6 @@
  * Class for part of an accounting questions
  *
  * @author    Fred Neumann <fred.neumann@fim.uni-erlangen.de>
- * @version    $Id:  $
  * @ingroup ModulesTestQuestionPool
  */
 class assAccountingQuestionPart
@@ -45,7 +44,7 @@ class assAccountingQuestionPart
 	private $text = '';
 
 	/**
-	 * @var array		XML representation of the booking definitions (stored in the DB)
+	 * @var string		XML representation of the booking definitions (stored in the DB)
 	 * 					Is set by setBookingXml();
 	 */
 	private $booking_xml = '';
@@ -76,10 +75,11 @@ class assAccountingQuestionPart
 	private $working_data = null;
 
 
-
-	/**
-	 * constructor
-	 */
+    /**
+     * constructor
+     * @param assAccountingQuestion $a_parent_obj
+     * @param integer $a_part_id
+     */
 	public function __construct($a_parent_obj, $a_part_id = null)
 	{
 		$this->parent = $a_parent_obj;
@@ -99,12 +99,13 @@ class assAccountingQuestionPart
 	/**
 	 * get ordered array with all parts of a question
 	 *
-	 * @param object question object
-	 * @return list of parts, ordered by their position
+	 * @param assAccountingQuestion $a_question_obj
+	 * @return assAccountingQuestionPart[] list of parts, ordered by their position
 	 */
 	static function _getOrderedParts($a_question_obj)
 	{
-		global $ilDB;
+	    global $DIC;
+	    $ilDB = $DIC->database();
 
 		$parts = array();
 
@@ -125,11 +126,12 @@ class assAccountingQuestionPart
 	/**
 	 * reads the part data from a database
 	 *
-	 * @param    integer    id of the question part
+	 * @param    integer    part_id of the question part
 	 */
-	public function read($part_id = null)
+	public function read($a_part_id = null)
 	{
-		global $ilDB;
+		global $DIC;
+		$ilDB = $DIC->database();
 
 		if (!isset($a_part_id)) {
 			$a_part_id = $this->getPartId();
@@ -157,7 +159,6 @@ class assAccountingQuestionPart
 		$this->setMaxPoints($a_data['max_points']);
 		$this->setMaxLines($a_data['max_lines']);
 
-		include_once("./Services/RTE/classes/class.ilRTE.php");
 		$this->setText(ilRTE::_replaceMediaObjectImageSrc($a_data["text"], 1));
 
 	}
@@ -167,7 +168,8 @@ class assAccountingQuestionPart
 	 */
 	public function write()
 	{
-		global $ilDB;
+        global $DIC;
+        $ilDB = $DIC->database();
 
 		if (!$this->getPartId()) {
 			$this->setPartId($ilDB->nextId('il_qpl_qst_accqst_part'));
@@ -194,7 +196,9 @@ class assAccountingQuestionPart
 	 */
 	public function delete()
 	{
-		global $ilDB;
+        global $DIC;
+        $ilDB = $DIC->database();
+
 		$query = 'DELETE FROM il_qpl_qst_accqst_part WHERE part_id=' . $ilDB->quote($this->getPartId(), 'integer');
 
 		if ($rows = $ilDB->manipulate($query)) {
@@ -209,7 +213,7 @@ class assAccountingQuestionPart
 	 *
 	 * this will also set the question id of the new parent
 	 *
-	 * @param object    assAccountingQuestion object
+	 * @param assAccountingQuestion    $a_parent_obj
 	 */
 	public function setParent($a_parent_obj)
 	{
@@ -226,9 +230,10 @@ class assAccountingQuestionPart
 		return $this->question_id;
 	}
 
-	/**
-	 * set the question id
-	 */
+    /**
+     * set the question id
+     * @param integer $a_question_id
+     */
 	public function setQuestionId($a_question_id)
 	{
 		$this->question_id = $a_question_id;
@@ -243,9 +248,10 @@ class assAccountingQuestionPart
 		return $this->part_id;
 	}
 
-	/**
-	 * set the part id
-	 */
+    /**
+     * set the part id
+     * @param integer $a_part_id
+     */
 	public function setPartId($a_part_id)
 	{
 		$this->part_id = $a_part_id;
@@ -260,9 +266,10 @@ class assAccountingQuestionPart
 		return $this->position;
 	}
 
-	/**
-	 * set the position
-	 */
+    /**
+     * set the position
+     * @param integer $a_position
+     */
 	public function setPosition($a_position)
 	{
 		$this->position = $a_position;
@@ -277,9 +284,10 @@ class assAccountingQuestionPart
 		return $this->text;
 	}
 
-	/**
-	 * set the question text
-	 */
+    /**
+     * set the question text
+     * @param integer $a_text
+     */
 	public function setText($a_text)
 	{
 		$this->text = $a_text;
@@ -296,11 +304,11 @@ class assAccountingQuestionPart
 		return $this->max_lines;
 	}
 
-	/**
-	 * set the maximum number of lines in the booking table
-	 *
-	 * @return    integer    lines
-	 */
+    /**
+     * set the maximum number of lines in the booking table
+     *
+     * @param integer $a_lines
+     */
 	public function setMaxLines($a_lines)
 	{
 		$this->max_lines = $a_lines;
@@ -316,11 +324,10 @@ class assAccountingQuestionPart
 		return $this->max_points;
 	}
 
-	/**
-	 * set the maximum points, a learner can reach answering the question
-	 *
-	 * @see $points
-	 */
+    /**
+     * set the maximum points, a learner can reach answering the question
+     * @param integer $a_points
+     */
 	public function setMaxPoints($a_points)
 	{
 		$this->max_points = $a_points;
@@ -337,7 +344,7 @@ class assAccountingQuestionPart
 	/**
 	 * get the booking definition from XML
 	 *
-	 * @param $a_booking
+	 * @param string $a_booking_xml
 	 */
 	public function setBookingXML($a_booking_xml)
 	{
@@ -345,11 +352,12 @@ class assAccountingQuestionPart
 		$this->analyzeBookingXML($a_booking_xml, true);
 	}
 
-	/**
-	 * get the correct booking data
-	 *
-	 * @return    array    booking data array
-	 */
+    /**
+     * get the correct booking data
+     *
+     * @param string|false $arg
+     * @return    array    booking data array
+     */
 	public function getBookingData($arg = FALSE)
 	{
 		if (!isset($this->booking_data)) {
@@ -722,6 +730,8 @@ class assAccountingQuestionPart
 						// not nice, but the flash version calculated this way
 						$limit = -$totalPoints;
 						break;
+					default:
+						$limit = 0;
 				}
 				$student['malusCount'.$uside] = max($correct['malusCount'.$uside], $limit);
 				$totalPoints += $student['malusCount'.$uside];
@@ -744,6 +754,7 @@ class assAccountingQuestionPart
 	/**
 	 * Get the floating point value of a string
 	 * @param    string $a_string
+	 * @return float
 	 */
 	public function toFloat($a_string)
 	{
@@ -757,5 +768,3 @@ class assAccountingQuestionPart
 		}
 	}
 }
-
-?>

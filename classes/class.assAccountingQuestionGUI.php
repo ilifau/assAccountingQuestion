@@ -4,7 +4,6 @@
  * GPLv2, see LICENSE
  */
 
-include_once "./Modules/TestQuestionPool/classes/class.assQuestionGUI.php";
 include_once "./Modules/Test/classes/inc.AssessmentConstants.php";
 
 /**
@@ -29,9 +28,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	const URL_SUFFIX = "?css_version=1.5.0";
 
-
+	/** @var ilassAccountingQuestionPlugin */
 	var $plugin = null;
 
+	/** @var ilPropertyFormGUI */
+	var $form = null;
 	/**
 	 * assAccountingQuestionGUI constructor
 	 *
@@ -43,7 +44,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	public function __construct($id = -1)
 	{
 		parent::__construct();
-		include_once "./Services/Component/classes/class.ilPlugin.php";
 		$this->plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, "TestQuestionPool", "qst", "assAccountingQuestion");
 		$this->plugin->includeClass("class.assAccountingQuestion.php");
 		$this->object = new assAccountingQuestion();
@@ -143,7 +143,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	private function initQuestionForm($add_booking = false)
 	{
-		include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 		$form->setFormAction($this->ctrl->getFormAction($this));
 		$form->setTitle($this->outQuestionType());
@@ -227,9 +226,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * add the properties of a question part to the form
 	 *
-	 * @param object    form object to extend
-	 * @param object    question part object
-	 * @param integer    counter of the question part
+	 * @param ilPropertyFormGUI $form
+	 * @param assAccountingQuestionPart $oart_obj
+	 * @param integer  $counter of the question part
 	 */
 	private function initPartProperties($form, $part_obj = null, $counter = "1")
 	{
@@ -265,7 +264,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$item->setCols(80);
 		if (!$this->object->getSelfAssessmentEditingMode()) {
 			$item->setUseRte(TRUE);
-			include_once "./Services/AdvancedEditing/classes/class.ilObjAdvancedEditing.php";
 			$item->setRteTags(ilObjAdvancedEditing::_getUsedHTMLTags("assessment"));
 			$item->addPlugin("latex");
 			$item->addButton("latex");
@@ -447,50 +445,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 
 	/**
-	 * Get the url for requesting the accounts definition as XML
-	 *
-	 * @return    string    file url
-	 */
-	private function getAccountsURL()
-	{
-		$this->ctrl->setParameter($this, "q_id", $this->object->getId());
-		return ILIAS_HTTP_PATH . '/' . $this->ctrl->getLinkTarget($this, "showAccountsXML");
-	}
-
-
-	/**
-	 * Command: show the accounts definitions as XML
-	 */
-	protected function showAccountsXML()
-	{
-		echo $this->object->getAccountsXML();
-		exit;
-	}
-
-	/**
-	 * Get the url for requesting a booking definition as XML
-	 *
-	 * @return    string    file url
-	 */
-	private function getBookingURL($part_id)
-	{
-		$this->ctrl->setParameter($this, "part_id", $part_id);
-		return ILIAS_HTTP_PATH . '/' . $this->ctrl->getLinkTarget($this, "showBookingXML");
-	}
-
-
-	/**
-	 * Command show a booking definitions as XML
-	 */
-	protected function showBookingXML()
-	{
-		$part_obj = $this->object->getPart($_GET['part_id']);
-		echo $part_obj->getBookingXML();
-		exit;
-	}
-
-
-	/**
 	 * Get the HTML output of the question for a test
 	 *
 	 * @param integer $active_id The active user id
@@ -506,7 +460,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// get the solution of the user for the active pass or from the last pass if allowed
 		if ($active_id)
 		{
-			require_once './Modules/Test/classes/class.ilObjTest.php';
 			if (!ilObjTest::_getUsePreviousAnswers($active_id, true))
 			{
 				if (is_null($pass)) $pass = ilObjTest::_getPass($active_id);
@@ -707,7 +660,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 
 		// rows
-		for ($i == 0; $i < $data['showLines']; $i++)
+		for ($i = 0; $i < $data['showLines']; $i++)
 		{
 			$tpl->touchBlock('booking_row');
 		}
@@ -749,7 +702,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$show_question_text = TRUE
 	)
 	{
-		global $ilCtrl, $ilAccess;
+		global $DIC;
+		$ilCtrl = $DIC->ctrl();
+		$ilAccess = $DIC->access();
 
 		// adjust the parameters for special cases
 		if ($ilCtrl->getCmd() == 'print'
@@ -1013,7 +968,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	function getSpecificFeedbackOutput($active_id, $pass)
 	{
-		global $ilAccess;
+		global $DIC;
+		$ilAccess = $DIC->access();
 
 		if (is_object($this->getPreviewSession()))
 		{
@@ -1028,7 +984,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// there is nospecific feedback except points
 		if (!$show_points)
 		{
-			return;
+			return '';
 		}
 
 		// get the user input
@@ -1068,10 +1024,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	public function setQuestionTabs()
 	{
-		global $rbacsystem, $ilTabs;
+		global $DIC;
+		$rbacsystem = $DIC->rbac()->system();
+		$ilTabs = $DIC->tabs();
 
 		$this->ctrl->setParameterByClass("ilpageobjectgui", "q_id", $_GET["q_id"]);
-		include_once "./Modules/TestQuestionPool/classes/class.assQuestion.php";
 		$q_type = $this->object->getQuestionType();
 
 		if (strlen($q_type)) {
@@ -1085,8 +1042,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				// edit page
 				$ilTabs->addTarget("edit_content",
 					$this->ctrl->getLinkTargetByClass("ilAssQuestionPageGUI", "edit"),
-					array("edit", "insert", "exec_pg"),
-					"", "", $force_active);
+					array("edit", "insert", "exec_pg"));
 			}
 
 			// preview
@@ -1103,7 +1059,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$url,
 				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
 					"parseQuestion", "saveEdit"),
-				$classname, "", $force_active);
+				$classname);
 		}
 
 		// add tab for question feedback within common class assQuestionGUI
@@ -1118,8 +1074,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				array("suggestedsolution", "saveSuggestedSolution", "outSolutionExplorer", "cancel",
 					"addSuggestedSolution", "cancelExplorer", "linkChilds", "removeSuggestedSolution"
 				),
-				$classname,
-				""
+				$classname
 			);
 		}
 
@@ -1128,7 +1083,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$ilTabs->addTarget("statistics",
 				$this->ctrl->getLinkTargetByClass($classname, "assessment"),
 				array("assessment"),
-				$classname, "");
+				$classname);
 		}
 
 		if (($_GET["calling_test"] > 0) || ($_GET["test_ref_id"] > 0)) {
@@ -1142,5 +1097,3 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 
 }
-
-?>

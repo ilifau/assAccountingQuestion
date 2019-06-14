@@ -4,7 +4,6 @@
  * GPLv2, see LICENSE
  */
 
-include_once "./Modules/TestQuestionPool/classes/class.assQuestion.php";
 include_once "./Modules/Test/classes/inc.AssessmentConstants.php";
 
 /**
@@ -24,7 +23,7 @@ class assAccountingQuestion extends assQuestion
 
 	/**
 	 * List of part objects
-	 * @var array
+	 * @var assAccountingQuestionPart[]
 	 */
 	private $parts = array();
 
@@ -108,7 +107,6 @@ class assAccountingQuestion extends assQuestion
 	public function getPlugin()
 	{
 		if ($this->plugin == null) {
-			include_once "./Services/Component/classes/class.ilPlugin.php";
 			$this->plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, "TestQuestionPool", "qst", "assAccountingQuestion");
 
 		}
@@ -147,8 +145,9 @@ class assAccountingQuestion extends assQuestion
 	 */
 	function saveToDb($original_id = "", $a_save_parts = true)
 	{
-		global $ilDB, $ilLog;
+		global $DIC;
 
+		$ilDB = $DIC->database();
 
 		// collect the maximum points of all parts
 		// must be done before basic data is saved
@@ -201,7 +200,8 @@ class assAccountingQuestion extends assQuestion
 	 */
 	public function loadFromDb($question_id)
 	{
-		global $ilDB;
+		global $DIC;
+		$ilDB = $DIC->database();
 
 		// load the basic question data
 		$result = $ilDB->query("SELECT qpl_questions.* FROM qpl_questions WHERE question_id = "
@@ -218,7 +218,6 @@ class assAccountingQuestion extends assQuestion
 		$this->setOwner($data["owner"]);
 		$this->setPoints($data["points"]);
 
-		include_once("./Services/RTE/classes/class.ilRTE.php");
 		$this->setQuestion(ilRTE::_replaceMediaObjectImageSrc($data["question_text"], 1));
 		$this->setEstimatedWorkingTime(substr($data["working_time"], 0, 2), substr($data["working_time"], 3, 2), substr($data["working_time"], 6, 2));
 
@@ -260,16 +259,22 @@ class assAccountingQuestion extends assQuestion
 		$this->parts = assAccountingQuestionPart::_getOrderedParts($this);
 	}
 
-	/**
-	 * Duplicates an assAccountingQuestion
-	 *
-	 * @access public
-	 */
+    /**
+     * Duplicates an assAccountingQuestion
+     *
+     * @access public
+     * @param bool $for_test
+     * @param string $title
+     * @param string $author
+     * @param string $owner
+     * @param int $testObjId
+     * @return int
+     */
 	function duplicate($for_test = true, $title = "", $author = "", $owner = "", $testObjId = null)
 	{
 		if ($this->getId() <= 0) {
 			// The question has not been saved. It cannot be duplicated
-			return;
+			return 0;
 		}
 
 		// make a real clone to keep the object unchanged
@@ -277,7 +282,6 @@ class assAccountingQuestion extends assQuestion
 		// the parts, however, still point to the original ones
 		$clone = clone $this;
 
-		include_once("./Modules/TestQuestionPool/classes/class.assQuestion.php");
 		$original_id = assQuestion::_getOriginalId($this->getId());
 		$clone->setId(-1);
 
@@ -316,16 +320,19 @@ class assAccountingQuestion extends assQuestion
 		return $clone->getId();
 	}
 
-	/**
-	 * Copies an assAccountingQuestion object
-	 *
-	 * @access public
-	 */
+    /**
+     * Copies an assAccountingQuestion object
+     *
+     * @access public
+     * @param int $target_questionpool_id
+     * @param string $title
+     * @return int
+     */
 	function copyObject($target_questionpool_id, $title = "")
 	{
 		if ($this->getId() <= 0) {
 			// The question has not been saved. It cannot be duplicated
-			return;
+			return 0;
 		}
 
 		// make a real clone to keep the object unchanged
@@ -333,7 +340,6 @@ class assAccountingQuestion extends assQuestion
 		// but parts will still point to the original ones
 		$clone = clone $this;
 
-		include_once("./Modules/TestQuestionPool/classes/class.assQuestion.php");
 		$original_id = assQuestion::_getOriginalId($this->getId());
 		$source_questionpool_id = $this->getObjId();
 		$clone->setId(-1);
@@ -367,8 +373,6 @@ class assAccountingQuestion extends assQuestion
 	 */
 	function syncWithOriginal()
 	{
-		global $ilDB;
-
 		if( !$this->getOriginalId() )
 		{
 			return;
@@ -419,14 +423,14 @@ class assAccountingQuestion extends assQuestion
 	/**
 	 * Clone the parts of another question
 	 *
-	 * @param    object    source question
+	 * @param    assAccountingQuestion    $a_source_obj
 	 * @access    public
 	 */
 	private function cloneParts($a_source_obj)
 	{
 		$cloned_parts = array();
 
-		foreach ($a_source_obj->parts as $part_obj) {
+		foreach ($a_source_obj->getParts() as $part_obj) {
 			// cloning is handled in the part object
 			// at this time the parent points to the original question
 			$part_clone = clone $part_obj;
@@ -461,6 +465,7 @@ class assAccountingQuestion extends assQuestion
 
 	/**
 	 * get the parts of the question
+	 * @return assAccountingQuestionPart[]
 	 */
 	function getParts()
 	{
@@ -487,16 +492,18 @@ class assAccountingQuestion extends assQuestion
 		return $part_obj;
 	}
 
-	/**
-	 * remove a part from the list of parts
-	 */
+    /**
+     * remove a part from the list of parts
+     * @param int $a_part_id
+     * @return bool
+     */
 	function deletePart($a_part_id)
 	{
 		foreach ($this->parts as $part_obj) {
 			if ($part_obj->getPartId() == $a_part_id) {
 				// delete the found part
 				if ($part_obj->delete()) {
-					unset($this->parts[$part_id]);
+					unset($this->parts[$a_part_id]);
 					$this->calculateMaximumPoints();
 					$this->saveToDB('', false);
 					return true;
@@ -846,23 +853,23 @@ class assAccountingQuestion extends assQuestion
 	}
 
 
-	/**
-	 * Calculate the points a learner has reached answering the question in a test
-	 * The points are calculated from the given answers
-	 *
-	 * @param integer $active The Id of the active learner
-	 * @param integer $pass The Id of the test pass
-	 * @param boolean $returndetails (deprecated !!)
-	 * @return integer/array $points/$details (array $details is deprecated !!)
-	 */
+    /**
+     * Calculate the points a learner has reached answering the question in a test
+     * The points are calculated from the given answers
+     *
+     * @param integer $active_id The Id of the active learner
+     * @param integer $pass The Id of the test pass
+	 * @param boolean $authorizedSolution (deprecated !!)
+     * @param boolean $returndetails (deprecated !!)
+     * @return integer/array $points/$details (array $details is deprecated !!)
+     * @throws ilTestException
+     */
 	public function calculateReachedPoints($active_id, $pass = NULL,  $authorizedSolution = true, $returndetails = FALSE)
 	{
 		if ($returndetails)
 		{
 			throw new ilTestException('return details not implemented for ' . __METHOD__);
 		}
-
-		global $ilDB, $ilLog;
 
 		if (is_null($pass))
 		{
@@ -919,8 +926,9 @@ class assAccountingQuestion extends assQuestion
 	/**
 	 * Saves the learners input of the question to the database
 	 *
-	 * @param    integer	active_id of the user
-	 * @param	 integer	pass number
+	 * @param    integer	$active_id
+	 * @param	 integer	$pass
+	 * * @param	 boolean	$authorized
 	 * @return   boolean 	successful saving
 	 *
 	 * @see    self::getSolutionStored()
@@ -929,7 +937,6 @@ class assAccountingQuestion extends assQuestion
 	{
 		if (is_null($pass))
 		{
-			include_once "./Modules/Test/classes/class.ilObjTest.php";
 			$pass = ilObjTest::_getPass($active_id);
 		}
 
@@ -950,7 +957,6 @@ class assAccountingQuestion extends assQuestion
         });
 
 		// log the saving, we assume that values have been entered
-		include_once("./Modules/Test/classes/class.ilObjAssessmentFolder.php");
 		if (ilObjAssessmentFolder::_enabledAssessmentLogging())
 		{
 			$this->logAction($this->lng->txtlng("assessment", "log_user_entered_values", ilObjAssessmentFolder::_getLogLanguage()), $active_id, $this->getId());
@@ -961,13 +967,14 @@ class assAccountingQuestion extends assQuestion
 
 
 	/**
-	 * Reworks the allready saved working data if neccessary
+	 * Reworks the already saved working data if neccessary
 	 *
 	 * @abstract
 	 * @access protected
 	 * @param integer $active_id
 	 * @param integer $pass
 	 * @param boolean $obligationsAnswered
+	 * * @param boolean $authorized
 	 */
 	protected function reworkWorkingData($active_id, $pass, $obligationsAnswered, $authorized)
 	{
@@ -1020,8 +1027,6 @@ class assAccountingQuestion extends assQuestion
      */
 	public function setExportDetailsXLS($worksheet, $startrow, $active_id, $pass)
 	{
-		global $lng;
-
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(0) . $startrow, $this->plugin->txt($this->getQuestionType()));
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(1) . $startrow, $this->getTitle());
 
@@ -1107,5 +1112,3 @@ class assAccountingQuestion extends assQuestion
 		return $export->toXML($a_include_header, $a_include_binary, $a_shuffle, $test_output, $force_image_references);
 	}
 }
-
-?>

@@ -4,8 +4,6 @@
  * GPLv2, see LICENSE 
  */
 
-include_once "./Modules/TestQuestionPool/classes/class.ilQuestionsPlugin.php";
-	
 /**
 * Accounting Question plugin
 *
@@ -30,4 +28,3 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 			return $this->txt($this->getQuestionType());
 		}
 }
-?>
