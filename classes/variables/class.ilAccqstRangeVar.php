@@ -9,40 +9,43 @@
 class ilAccqstRangeVar extends ilAccqstVariable
 {
     /** @var string minimum value */
-    public $min;
+    private $min;
 
     /** @var string maximum value */
-    public $max;
+    private $max;
 
     /** @var string step for creating values between min and max */
-    public $step = 1;
+    private $step = 1;
 
 
     /**
-     * Get a variable definition from an XML element
-     * (null in case of parse error)
+     * Init the variable definition from an XML element
      * @param SimpleXMLElement $element
-     * @param ilassAccountingQuestionPlugin $plugin
-     * @return self
      * @throws ilException
      */
-    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
+    public function initFromXmlElement(SimpleXMLElement $element)
     {
-        $var = new self((string) $element['name']);
-
         if (empty($element['min']) || empty($element['max']))
         {
-            throw new ilException(sprintf($plugin->txt('missing_min_max'), $var->name));
+            throw new ilException(sprintf($this->plugin->txt('missing_min_max'), $this->name));
         }
 
-        $var->min = (string) $element['min'];
-        $var->max = (string) $element['max'];
+        $this->min = (string) $element['min'];
+        $this->max = (string) $element['max'];
         if (!empty($element['step']))
         {
-            $var->step = (string) $element['step'];
+            $this->step = (string) $element['step'];
         }
+    }
 
-        return $var;
+    /**
+     * Get the names of all variables that are directly used by this variable
+     * @param string[] $names list of all available variable names
+     * @return string[]
+     */
+    public function getUsedNames($names)
+    {
+        return [];
     }
 
 }

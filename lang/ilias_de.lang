@@ -66,3 +66,10 @@ double_variable_definition#:#Die Variable mit dem Namen "%s" ist doppelt definie
 unknown_variable_type#:#Die Variable mit dem Namen "%s" hat einen unbekannten Typ.
 missing_min_max#:#Die variable "%s" hat kein "min"- oder "max"-Attribut definiert.
 select_child_not_val#:#Die Variable "%s" darf nur "val"-Elemente enthalten.
+missing_check#:#Die Variable "%s" hat kein "check"-Attribut definiert.
+missing_case_value_or_max#:#Die Variable "%s" hat einen <case> ohne "value" oder "max"-Attribut definiert.
+unknown_child#:#Die Variable "%s" hat ein unbekanntes Unter-Element.
+missing_content#:#Die Variable "%s" hat keinen Inhalt.
+exceeded_calculation_depth#:#Die maximale Berechungstiefe wurde bei Variable "%s" überschritten.
+forbidden_self_reference#:#Die Variable "%s" darf sich nicht selbst referenzieren.
+unknown_variable_reference#:#Die Variable "%s" verwendet eine nicht definierte Variable "%s".

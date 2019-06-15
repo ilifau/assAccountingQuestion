@@ -8,35 +8,36 @@
  */
 class ilAccqstSelectVar extends ilAccqstVariable
 {
-
     /** @var string[] list of values */
-    public $values = [];
+    private $values = [];
 
 
     /**
-     * Get a variable definition from an XML element
-     * (null in case of parse error)
+     * Init the variable definition from an XML element
      * @param SimpleXMLElement $element
-     * @param ilassAccountingQuestionPlugin $plugin
-     * @return self
      * @throws ilException
      */
-    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
+    public function initFromXmlElement(SimpleXMLElement $element)
     {
-        $var = new self((string) $element['name']);
-
         foreach ($element->children() as $child)
         {
             if ($child->getName() != 'val')
             {
-                throw new ilException(sprintf($plugin->txt('select_child_not_val'), $var->name));
+                throw new ilException(sprintf($this->plugin->txt('select_child_not_val'), $this->name));
             }
 
-            $var->values[] = (string) $child;
+            $this->values[] = trim((string) $child);
         }
-
-        return $var;
     }
 
+    /**
+     * Get the names of all variables that are directly used by this variable
+     * @param string[] $names list of all available variable names
+     * @return string[]
+     */
+    public function getUsedNames($names)
+    {
+        return [];
+    }
 
 }

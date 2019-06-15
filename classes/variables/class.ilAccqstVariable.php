@@ -17,16 +17,18 @@ abstract class ilAccqstVariable
     const TYPE_EVAL = 'eval';
 
     /** @var string name of the variable */
-    public $name;
+    protected $name;
 
-    /** @var string the currently selected or calculated value */
-    public $value;
+    /** @var mixed the currently selected or calculated value */
+    protected $value;
 
+    /** @var ilAssAccountingQuestionPlugin */
+    protected $plugin;
 
     /**
      * Get variables from an XML definition
-     * @param   string
-     * @param   ilassAccountingQuestionPlugin
+     * @param   string $xml
+     * @param   ilAssAccountingQuestionPlugin $plugin
      * @return self[]  (indexed by name)
      * @throws ilException
      */
@@ -35,39 +37,44 @@ abstract class ilAccqstVariable
         $variables = [];
 
         $xml = @simplexml_load_string($xml);
-        if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables'))
-        {
+        if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables')) {
             throw new ilException($plugin->txt('missing_element_variables'));
         }
 
         foreach ($xml->children() as $element)
         {
-            if ($element->getName() != 'var' || empty($element['name']))
-            {
+            if ($element->getName() != 'var' || empty($element['name'])) {
                 throw new ilException($plugin->txt('missing_var_or_name'));
             }
             $name = (string) $element['name'];
             $type = (string) $element['type'];
 
-            if (isset($variables[$name]))
-            {
+            if (isset($variables[$name])) {
                 // variable is already defined
-                throw new ilException(sprintf($plugin->txt('double_variable_definition', $name)));
+                throw new ilException(sprintf($plugin->txt('double_variable_definition'), $name));
             }
 
             switch ($type)
             {
                 case self::TYPE_RANGE:
-                    $variable = ilAccqstRangeVar::getFromXmlElement($element, $plugin);
+                    $variable = new ilAccqstRangeVar($name, $plugin);
                     break;
                 case self::TYPE_SELECT:
-                    $variable = ilAccqstSelectVar::getFromXmlElement($element, $plugin);
+                    $variable = new ilAccqstSelectVar($name, $plugin);
                     break;
+                case self::TYPE_SWITCH:
+                    $variable = new ilAccqstSwitchVar($name, $plugin);
+                    break;
+                case self::TYPE_EVAL:
+                    $variable = new ilAccqstEvalVar($name, $plugin);
+                    break;
+
                 default:
                     // unknown type
                     throw new ilException($plugin->txt(sprintf('unknown_variable_type', $name)));
             }
 
+            $variable->initFromXmlElement($element, $plugin);
             $variables[$name] = $variable;
         }
 
@@ -76,50 +83,15 @@ abstract class ilAccqstVariable
 
 
     /**
-     * Get a variable definition from an XML element
-     * (null in case of parse error)
-     * @param SimpleXMLElement $element
-     * @param ilassAccountingQuestionPlugin $plugin
-     * @return self
-     * @throws ilException
-     */
-    public static function getFromXmlElement(SimpleXMLElement $element, ilassAccountingQuestionPlugin $plugin)
-    {
-        return null;
-    }
-
-
-    /**
-     * Get the floating point value of a string
-     * @param  string $a_string
-     * @return float
-     */
-    public static function stringToFloat($a_string)
-    {
-        if ($a_string)
-        {
-            $string = str_replace('.', '', $a_string);
-            $string = str_replace(' ', '', $string);
-            $string = str_replace(',', '.', $string);
-            return floatval($string);
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    /**
      * Calculate the values of all variables
      * @param self[] $variables
      * @return bool
      */
     public static function calculateValues(&$variables)
     {
-        foreach ($variables as $var)
+        foreach ($variables as $name => $var)
         {
-            if (!$var->calculateValue($variables))
-            {
+            if (!$var->calculateValue($variables)) {
                 return false;
             }
         }
@@ -129,24 +101,104 @@ abstract class ilAccqstVariable
     /**
      * ilAccqstVariable constructor.
      * @param string $name
+     * @param ilassAccountingQuestionPlugin $plugin
      */
-    public function __construct($name)
+    public function __construct($name, $plugin)
     {
         $this->name = $name;
+        $this->plugin = $plugin;
     }
+
+    /**
+     * Init a variable definition from an XML element
+     * (null in case of parse error)
+     * @param SimpleXMLElement $element
+     * @throws ilException
+     */
+    abstract public function initFromXmlElement(SimpleXMLElement $element);
 
 
     /**
+     * Get the names of all variables that are directly used by this variable
+     * @param string[] $names list of all available variable names
+     * @return string[]
+     */
+    abstract public function getUsedNames($names);
+
+    /**
      * Calculate the value of the variable
-     * @param self[]
-     * @param  integer  calculation depth
+     * Child classes should override this and call the parent at the beginning
+     *
+     * @param self[] $variables
+     * @param  integer  $depth calculation depth
      * @return bool
      */
     public function calculateValue(&$variables, $depth = 0)
     {
-        if ($depth > self::MAX_DEPTH)
-        {
-            return false;
+        // probably a circular reference
+        if ($depth > self::MAX_DEPTH) {
+            throw new ilException($this->plugin->txt(sprintf('exceeded_calculation_depth', $this->name)));
+        }
+
+        // value is already calculated (e.g. by recursion from another variable)
+        if (isset($this->value)) {
+            return true;
+        }
+
+        // calculate all dependencies
+        foreach ($this->getUsedNames(array_keys($variables)) as $name) {
+            if ($name == $this->name) {
+                throw new ilException($this->plugin->txt(sprintf('forbidden_self_reference', $this->name)));
+            }
+            if (!isset($variables[$name])) {
+                throw new ilException($this->plugin->txt(sprintf('unknown_variable_reference', $this->name, $name)));
+            }
+            $variables[$name]->calculateValue($variables, $depth + 1);
+        }
+
+        // child class must calculate
+        return false;
+    }
+
+
+    /**
+     * Get the floating point value of the variable
+     * @return float
+     */
+    public function getFloat()
+    {
+        if (is_float($this->value)) {
+            return $this->value;
+        }
+        elseif (is_int($this->value)) {
+            return (float) $this->value;
+        }
+        elseif (is_string($this->value)) {
+            $string = $this->value;
+            $string = str_replace('.', '', $string);
+            $string = str_replace(' ', '', $string);
+            $string = str_replace(',', '.', $string);
+            return floatval($string);
+        }
+        else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the string value of the variable
+     * @return string
+     */
+    public function getString()
+    {
+        if (is_string($this->value)) {
+            return $this->value;
+        }
+        elseif (is_int($this->value) || is_float($this->value)) {
+            return (string) $this->value;
+        }
+        else {
+            return null;
         }
     }
 }
