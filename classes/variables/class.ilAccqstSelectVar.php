@@ -9,7 +9,7 @@
 class ilAccqstSelectVar extends ilAccqstVariable
 {
     /** @var string[] list of values */
-    private $values = [];
+    public $values = [];
 
 
     /**

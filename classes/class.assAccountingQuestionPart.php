@@ -51,26 +51,26 @@ class assAccountingQuestionPart
 
 	/**
 	 * @var array 		Array representation of the booking definitions (not stored)
-	 * 					Is set by analyzeBookingXML()
+	 * 					Is set by setBookingXML()
 	 */
-	private $booking_data = null;
+	private $booking_data = [];
 
 	/**
 	 * @var integer		Maximum number of lines to be shown to the user (stored in the DB)
-	 * 					Is set by analyzeBookingXML()
+	 * 					Is set by setBookingXML()
 	 */
 	private $max_lines = 0;
 
 	/**
 	 * @var integer		Maximum number of points a user can reach (stored in the DB)
-	 * 					Is set by analyzeBookingXML()
+	 * 					Is set by setBookingXML()
 	 */
 	private $max_points = 0;
 
 
 	/**
 	 * @var array 		Array representation of the student input
-	 * 					Is set by analyzeWorkingXML()
+	 * 					Is set by setWorkingXML()
 	 */
 	private $working_data = null;
 
@@ -341,17 +341,6 @@ class assAccountingQuestionPart
 		return $this->booking_xml;
 	}
 
-	/**
-	 * get the booking definition from XML
-	 *
-	 * @param string $a_booking_xml
-	 */
-	public function setBookingXML($a_booking_xml)
-	{
-		$this->booking_xml = $a_booking_xml;
-		$this->analyzeBookingXML($a_booking_xml, true);
-	}
-
     /**
      * get the correct booking data
      *
@@ -360,9 +349,6 @@ class assAccountingQuestionPart
      */
 	public function getBookingData($arg = FALSE)
 	{
-		if (!isset($this->booking_data)) {
-			$this->analyzeBookingXML($this->getBookingXML(), true);
-		}
 		if (is_string($arg)) {
 			return $this->booking_data[$arg];
 		} else {
@@ -379,10 +365,9 @@ class assAccountingQuestionPart
 	 * Other data is set in class variable 'booking_data'
 	 *
 	 * @param    string        xml booking definition
-	 * @param    boolean        set data, max points and max lines
 	 * @return    boolean        booking definition is ok (true/false)
 	 */
-	public function analyzeBookingXML($a_booking_xml, $a_set = false)
+	public function setBookingXML($a_booking_xml)
 	{
 		// load the xml object
 		$xml = @simplexml_load_string($a_booking_xml);
@@ -548,23 +533,21 @@ class assAccountingQuestionPart
 				return false;
 		}
 
-		// set the values if ok
-		if ($a_set) {
-			$this->booking_data = $data;
-			$this->setMaxLines($max_lines);
-			$this->setMaxPoints($max_points);
-		}
+        $this->booking_xml = $a_booking_xml;
+		$this->booking_data = $data;
+		$this->setMaxLines($max_lines);
+		$this->setMaxPoints($max_points);
 
 		return true;
 	}
 
 
 	/**
-	 * Analyze the working data from the xml input of a runing test
+	 * Set the working data from the xml input of a runing test
 	 *
 	 * @param    string        xml input
 	 */
-	public function analyzeWorkingXML($a_working_xml)
+	public function setWorkingXML($a_working_xml)
 	{
 		// get the correct solution
 		$correct = $this->getBookingData();

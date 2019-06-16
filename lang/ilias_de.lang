@@ -73,3 +73,4 @@ missing_content#:#Die Variable "%s" hat keinen Inhalt.
 exceeded_calculation_depth#:#Die maximale Berechungstiefe wurde bei Variable "%s" überschritten.
 forbidden_self_reference#:#Die Variable "%s" darf sich nicht selbst referenzieren.
 unknown_variable_reference#:#Die Variable "%s" verwendet eine nicht definierte Variable "%s".
+var_not_calculated#:#Die Variable "%" konnte nicht berechnet werden.

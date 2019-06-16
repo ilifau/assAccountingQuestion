@@ -194,7 +194,12 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_edit_xml.html');
         $tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($this->object->getVariablesXML()));
         $tpl->setVariable("NAME", 'variables_xml');
-        $tpl->setVariable("DUMP", print_r($this->object->getVariables(), true));
+        if ($this->plugin->isDebug()) {
+            $dump = print_r($this->object->getVariablesDump(), true);
+            $dump = str_replace('{','&#123;', $dump);
+            $dump = str_replace('}','&#125;', $dump);
+            $tpl->setVariable("DUMP", $dump);
+        }
         $item->setHTML($tpl->get());
         $form->addItem($item);
 
@@ -344,22 +349,23 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 
 			// check the accounts definition but save it anyway
-			if (!$this->object->analyzeAccountsXML($accounts_xml, false)) {
+			if (!$this->object->setAccountsXML($accounts_xml)) {
 				$error .= $this->plugin->txt('xml_accounts_error');
 			}
-			$this->object->setAccountsXML($accounts_xml);
-
 
 			// get and check the variables XML
             $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
             if (!empty($variables_xml))
 			{
-				if(!$this->object->analyzeVariablesXML($variables_xml, false))
+				if(!$this->object->setVariablesXML($variables_xml))
+                {
+                    $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
+                }
+                elseif (!$this->object->calculateVariables())
                 {
                     $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
                 }
             }
-			$this->object->setVariablesXML($variables_xml);
 
 			// sort the part positions
 			$positions = array();
@@ -391,10 +397,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				}
 
 				// check the booking definition but save it anyway
-				if (!$part_obj->analyzeBookingXML($booking_xml, false)) {
+				if (!$part_obj->setBookingXML($booking_xml)) {
 					$error .= sprintf($this->plugin->txt('xml_booking_error'), $pos);
 				}
-				$part_obj->setBookingXML($booking_xml);
 			}
 
 			if ($error != '') {
@@ -507,7 +512,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		foreach ($parts as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->analyzeWorkingXML($a_solution[$part_id]);
+			$part_obj->setWorkingXML($a_solution[$part_id]);
 			$w_data = $part_obj->getWorkingData();
 
 			$tpl->setCurrentBlock('question_part');
@@ -758,7 +763,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 			else
 			{
-				$part_obj->analyzeWorkingXML($solution[$part_id]);
+				$part_obj->setWorkingXML($solution[$part_id]);
 				$part_obj->calculateReachedPoints();
 				$table_data = $part_obj->getWorkingData();
 			}
@@ -998,7 +1003,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		foreach ($this->object->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->analyzeWorkingXml($solution[$part_id]);
+			$part_obj->setWorkingXML($solution[$part_id]);
 			$part_obj->calculateReachedPoints();
 			$student_data = $part_obj->getWorkingData();
 

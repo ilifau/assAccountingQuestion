@@ -9,7 +9,7 @@
 class ilAccqstEvalVar extends ilAccqstVariable
 {
     /** @var string mathematical expression */
-    private $expression;
+    public $expression;
 
 
     /**

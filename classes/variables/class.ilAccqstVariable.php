@@ -1,8 +1,11 @@
 <?php
 // Copyright (c) 2019 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg, GPLv3, see LICENSE
 
+require_once __DIR__ . '/class.ilAccqstEvalVar.php';
 require_once __DIR__ . '/class.ilAccqstRangeVar.php';
 require_once __DIR__ . '/class.ilAccqstSelectVar.php';
+require_once __DIR__ . '/class.ilAccqstSwitchVar.php';
+
 
 /**
  * Base class for variable definition
@@ -17,10 +20,10 @@ abstract class ilAccqstVariable
     const TYPE_EVAL = 'eval';
 
     /** @var string name of the variable */
-    protected $name;
+    public $name;
 
     /** @var mixed the currently selected or calculated value */
-    protected $value;
+    public $value;
 
     /** @var ilAssAccountingQuestionPlugin */
     protected $plugin;
@@ -83,22 +86,6 @@ abstract class ilAccqstVariable
 
 
     /**
-     * Calculate the values of all variables
-     * @param self[] $variables
-     * @return bool
-     */
-    public static function calculateValues(&$variables)
-    {
-        foreach ($variables as $name => $var)
-        {
-            if (!$var->calculateValue($variables)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * ilAccqstVariable constructor.
      * @param string $name
      * @param ilassAccountingQuestionPlugin $plugin
@@ -131,7 +118,7 @@ abstract class ilAccqstVariable
      *
      * @param self[] $variables
      * @param  integer  $depth calculation depth
-     * @return bool
+     * @return bool     value is already calculated
      */
     public function calculateValue(&$variables, $depth = 0)
     {

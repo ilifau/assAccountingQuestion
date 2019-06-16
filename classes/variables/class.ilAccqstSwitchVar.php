@@ -8,10 +8,11 @@
  */
 class ilAccqstSwitchVar extends ilAccqstVariable
 {
-    private $check = '';
+    /** @var string  */
+    public $check = '';
 
     /** @var array [[type => 'value'|'max'|'default', test => string, return => string], ... ] */
-    private $cases = [];
+    public $cases = [];
 
 
     /**

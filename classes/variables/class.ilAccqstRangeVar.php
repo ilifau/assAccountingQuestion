@@ -9,13 +9,13 @@
 class ilAccqstRangeVar extends ilAccqstVariable
 {
     /** @var string minimum value */
-    private $min;
+    public $min;
 
     /** @var string maximum value */
-    private $max;
+    public $max;
 
     /** @var string step for creating values between min and max */
-    private $step = 1;
+    public $step = 1;
 
 
     /**

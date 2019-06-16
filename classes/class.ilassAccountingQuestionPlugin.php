@@ -13,18 +13,27 @@
 */
 class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 {
-		final function getPluginName()
-		{
-			return "assAccountingQuestion";
-		}
-		
-		final function getQuestionType()
-		{
-			return "assAccountingQuestion";
-		}
-		
-		final function getQuestionTypeTranslation()
-		{
-			return $this->txt($this->getQuestionType());
-		}
+    final function getPluginName()
+    {
+        return "assAccountingQuestion";
+    }
+
+    final function getQuestionType()
+    {
+        return "assAccountingQuestion";
+    }
+
+    final function getQuestionTypeTranslation()
+    {
+        return $this->txt($this->getQuestionType());
+    }
+
+    /**
+     * Define if debugging outputs should be shown
+     * @return bool
+     */
+    public function isDebug()
+    {
+        return true;
+    }
 }

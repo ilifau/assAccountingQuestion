@@ -36,14 +36,14 @@ class assAccountingQuestion extends assQuestion
 
 	/**
 	 * Array representation of accounts definitions
-	 * Is set implictly by setAccountsXML()
+	 * Is set by setAccountsXML()
 	 * @var array
 	 */
-	private $accounts_data = null; // init with null to load at first request
+	private $accounts_data = [];
 
 	/**
 	 * Display mode of accounts in the select fields
-	 * Is set implictly by setAccountsXML()
+	 * Is set by setAccountsXML()
 	 * @var string
 	 */
 	private $accounts_display = 'both'; // 'number', 'title', 'both'
@@ -522,12 +522,15 @@ class assAccountingQuestion extends assQuestion
 	 * Data is set in class variable 'accounts_data' (not stored in db)
 	 *
 	 * @param    string        xml definition of the accounts
-	 * @param    boolean        set accounts data and display mode
 	 * @return    boolean        definition is ok (true/false)
 	 */
-	public function analyzeAccountsXML($a_accounts_xml, $a_set = true)
+	public function setAccountsXML($a_accounts_xml)
 	{
-		$xml = @simplexml_load_string($a_accounts_xml);
+	    // default values
+        $this->accounts_data = array();
+        $this->accounts_display = "beide";
+
+        $xml = @simplexml_load_string($a_accounts_xml);
 
 		if (!is_object($xml)) {
 			return false;
@@ -568,17 +571,10 @@ class assAccountingQuestion extends assQuestion
 			$data[] = $account;
 		}
 
-		// set the values if ok
-		if ($a_set) {
-			$this->accounts_data = $data;
-			$this->accounts_display = $display;
-		}
-		else
-		{
-			$this->accounts_data = array();
-			$this->accounts_display = "beide";
-		}
-
+		// set data if ok
+        $this->accounts_xml = $a_accounts_xml;
+        $this->accounts_data = $data;
+        $this->accounts_display = $display;
 		return true;
 	}
 
@@ -590,9 +586,6 @@ class assAccountingQuestion extends assQuestion
 	 */
 	public function getAccountsData()
 	{
-		if (!isset($this->accounts_data)) {
-			$this->analyzeAccountsXML($this->getAccountsXML(), true);
-		}
 		return (array) $this->accounts_data;
 	}
 
@@ -633,18 +626,6 @@ class assAccountingQuestion extends assQuestion
 
 
 	/**
-	 * set the accounts definitions from XML
-	 *
-	 * @param    string    xml definition of the accounts
-	 */
-	public function setAccountsXML($a_accounts_xml)
-	{
-		$this->accounts_xml = $a_accounts_xml;
-		$this->analyzeAccountsXML($a_accounts_xml, true);
-	}
-
-
-	/**
 	 * get the accounts definition as XML
 	 *
 	 * @return    string    xml definition of the accounts
@@ -656,12 +637,11 @@ class assAccountingQuestion extends assQuestion
 
 
     /**
-	 * Analyze the variables XML definition
+	 * set the variables definitions from XML
      * @param string $a_variables_xml	code
-     * @param bool $a_set			set the variables
 	 * @return bool					definition is ok
      */
-	public function analyzeVariablesXML($a_variables_xml, $a_set = true)
+	public function setVariablesXML($a_variables_xml)
 	{
 		try
 		{
@@ -673,23 +653,11 @@ class assAccountingQuestion extends assQuestion
 			return false;
 		}
 
-		if ($a_set)
-		{
-			$this->variables = $variables;
-		}
+
+        $this->variables_xml = $a_variables_xml;
+        $this->variables = $variables;
 		return true;
 	}
-
-    /**
-     * set the variables definitions from XML
-     *
-     * @param    string    xml definition of the variables
-     */
-    public function setVariablesXML($a_variables_xml)
-    {
-        $this->variables_xml = $a_variables_xml;
-        $this->analyzeVariablesXML($a_variables_xml, true);
-    }
 
 
     /**
@@ -708,8 +676,45 @@ class assAccountingQuestion extends assQuestion
      */
 	public function getVariables()
 	{
-		return $this->variables;
+		return (array) $this->variables;
 	}
+
+    /**
+     * Get the list of variables
+     * @return array
+     */
+    public function getVariablesDump()
+    {
+        $dump = [];
+        foreach ($this->variables as $var) {
+            $dump[$var->name] = get_object_vars($var);
+        }
+
+        return $dump;
+    }
+
+    /**
+     * Calculate the values of all variables
+     * @return bool
+     */
+    public function calculateVariables()
+    {
+        try {
+            foreach ($this->variables as $name => $var)
+            {
+                if (!$var->calculateValue($this->variables)) {
+                    $this->analyze_error = sprintf($this->plugin->txt('var_not_calculated'), $var->name);
+                    return false;
+                }
+            }
+        }
+        catch (Exception $e) {
+            $this->analyze_error = $e->getMessage();
+            return false;
+        }
+
+        return true;
+    }
 
 
     /**
@@ -904,7 +909,7 @@ class assAccountingQuestion extends assQuestion
 		foreach ($this->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->analyzeWorkingXML($solution[$part_id]);
+			$part_obj->setWorkingXML($solution[$part_id]);
 			$points += $part_obj->calculateReachedPoints();
 		}
 
@@ -1042,7 +1047,7 @@ class assAccountingQuestion extends assQuestion
             $worksheet->setBold($worksheet->getColumnCoord(0) . $row);
 
 			// the excel fields can be filled from the stored input
-			$part_obj->analyzeWorkingXMl($solutions[$part_id]);
+			$part_obj->setWorkingXML($solutions[$part_id]);
 			$part_obj->calculateReachedPoints();
 			$data = $part_obj->getWorkingData();
 
