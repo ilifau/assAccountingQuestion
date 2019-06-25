@@ -69,6 +69,11 @@ class assAccountingQuestion extends assQuestion
      */
 	private $analyze_error = '';
 
+    /**
+     * Tolerance for comparing floating point values
+     * @var float
+     */
+	private $tolerance = 0;
 
 	/**
 	 * ilAccountingQuestion constructor
@@ -102,7 +107,7 @@ class assAccountingQuestion extends assQuestion
 	}
 
 	/**
-	 * @return object The plugin object
+	 * @return ilassAccountingQuestionPlugin The plugin object
 	 */
 	public function getPlugin()
 	{
@@ -645,7 +650,7 @@ class assAccountingQuestion extends assQuestion
 	{
 		try
 		{
-            $variables = ilAccqstVariable::getVariablesFromXmlCode($a_variables_xml, $this->plugin);
+            $variables = ilAccqstVariable::getVariablesFromXmlCode($a_variables_xml, $this);
 		}
 		catch (Exception $e)
 		{
@@ -695,7 +700,8 @@ class assAccountingQuestion extends assQuestion
 
     /**
      * Calculate the values of all variables
-     * @return bool
+     * A calculation error mesage is provided with getAnalyzeError()
+     * @return bool all variables are calculated
      */
     public function calculateVariables()
     {
@@ -714,6 +720,33 @@ class assAccountingQuestion extends assQuestion
         }
 
         return true;
+    }
+
+    /**
+     * Substitute the referenced variables in a string
+     * @param $string
+     * @return $string
+     */
+    public function substituteVariables($string) {
+        foreach ($this->variables as $name => $var) {
+            $pattern = '{' . $name . '}';
+            if (strpos($string, $pattern) !== false) {
+                $string = str_replace($name, $var->getString(), $string);
+            }
+        }
+        return $string;
+    }
+
+
+    /**
+     * Check if two values are equal
+     * @param float $val1;
+     * @param float $val2;
+     * @return bool;
+     */
+    public function equals($val1, $val2)
+    {
+        return (abs($val1 - $val2) <= $this->tolerance);
     }
 
 

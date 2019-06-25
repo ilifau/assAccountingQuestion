@@ -384,7 +384,7 @@ class assAccountingQuestionPart
 		$data = array();
 
 		// init specific criteria (saved in db)
-		$max_lines = (int)$this->toFloat($xml['zeilen']);
+		$max_lines = (int)$this->plugin->toFloat($xml['zeilen']);
 		$max_points = 0;
 
 		switch ($type) {
@@ -403,11 +403,11 @@ class assAccountingQuestionPart
 
 				// t-accounts have all bookings in one record
 				$record = array();
-				$record['bonusOrderLeft'] = $this->toFloat($xml['bonus_reihe_links']);
-				$record['bonusOrderRight'] = $this->toFloat($xml['bonus_reihe_rechts']);
-				$record['malusCountLeft'] = -$this->toFloat($xml['malus_anzahl_links']);
-				$record['malusCountRight'] = -$this->toFloat($xml['malus_anzahl_rechts']);
-				$record['malusSumsDiffer'] = -$this->toFloat($xml['malus_summen']);
+				$record['bonusOrderLeft'] = $this->plugin->toFloat($xml['bonus_reihe_links']);
+				$record['bonusOrderRight'] = $this->plugin->toFloat($xml['bonus_reihe_rechts']);
+				$record['malusCountLeft'] = -$this->plugin->toFloat($xml['malus_anzahl_links']);
+				$record['malusCountRight'] = -$this->plugin->toFloat($xml['malus_anzahl_rechts']);
+				$record['malusSumsDiffer'] = -$this->plugin->toFloat($xml['malus_summen']);
 				$record['sumValuesLeft'] = 0;
 				$record['sumValuesRight'] = 0;
 				$record['sumPointsLeft'] = 0;
@@ -429,8 +429,8 @@ class assAccountingQuestionPart
 							$rows[$leftrow]['leftAccountNum'] = $account['number'];
 							$rows[$leftrow]['leftAccountText'] = $account['text'];
 							$rows[$leftrow]['leftValueRaw'] = (string)$booking['betrag'];
-							$rows[$leftrow]['leftValueMoney'] = $this->toFloat($booking['betrag']);
-							$rows[$leftrow]['leftPoints'] = $this->toFloat($booking['punkte']);
+							$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+							$rows[$leftrow]['leftPoints'] = $this->plugin->toFloat($booking['punkte']);
 							$record['sumValuesLeft'] += $rows[$leftrow]['leftValueMoney'];
 							$record['sumPointsLeft'] += $rows[$leftrow]['leftPoints'];
 							$leftrow++;
@@ -441,15 +441,15 @@ class assAccountingQuestionPart
 							$rows[$rightrow]['rightAccountNum'] = $account['number'];
 							$rows[$rightrow]['rightAccountText'] = $account['text'];
 							$rows[$rightrow]['rightValueRaw'] = (string)$booking['betrag'];
-							$rows[$rightrow]['rightValueMoney'] = $this->toFloat($booking['betrag']);
-							$rows[$rightrow]['rightPoints'] = $this->toFloat($booking['punkte']);
+							$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+							$rows[$rightrow]['rightPoints'] = $this->plugin->toFloat($booking['punkte']);
 							$record['sumValuesRight'] += $rows[$rightrow]['rightValueMoney'];
 							$record['sumPointsRight'] += $rows[$rightrow]['rightPoints'];
 							$rightrow++;
 							break;
 					}
 
-					$max_points += $this->toFloat($booking['punkte']);
+					$max_points += $this->plugin->toFloat($booking['punkte']);
 				}
 				$record['rows'] = $rows;
 				$record['countLeft'] = $leftrow;
@@ -474,9 +474,9 @@ class assAccountingQuestionPart
 				foreach ($xml->children() as $child) {
 					// each child is one record
 					$record = array();
-					$record['malusCountLeft'] = -$this->toFloat($child['malus_anzahl_von']);
-					$record['malusCountRight'] = -$this->toFloat($child['malus_anzahl_an']);
-					$record['malusSumsDiffer'] = -$this->toFloat($child['malus_summen']);
+					$record['malusCountLeft'] = -$this->plugin->toFloat($child['malus_anzahl_von']);
+					$record['malusCountRight'] = -$this->plugin->toFloat($child['malus_anzahl_an']);
+					$record['malusSumsDiffer'] = -$this->plugin->toFloat($child['malus_summen']);
 					$record['sumValuesLeft'] = 0;
 					$record['sumValuesRight'] = 0;
 					$record['sumPointsLeft'] = 0;
@@ -496,8 +496,8 @@ class assAccountingQuestionPart
 								$rows[$leftrow]['leftAccountNum'] = $account['number'];
 								$rows[$leftrow]['leftAccountText'] = $account['text'];
 								$rows[$leftrow]['leftValueRaw'] = (string)$booking['betrag'];
-								$rows[$leftrow]['leftValueMoney'] = $this->toFloat($booking['betrag']);
-								$rows[$leftrow]['leftPoints'] = $this->toFloat($booking['punkte']);
+								$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+								$rows[$leftrow]['leftPoints'] = $this->plugin->toFloat($booking['punkte']);
 								$record['sumValuesLeft'] += $rows[$leftrow]['leftValueMoney'];
 								$record['sumPointsLeft'] += $rows[$leftrow]['leftPoints'];
 								$leftrow++;
@@ -508,14 +508,14 @@ class assAccountingQuestionPart
 								$rows[$rightrow]['rightAccountNum'] = $account['number'];
 								$rows[$rightrow]['rightAccountText'] = $account['text'];
 								$rows[$rightrow]['rightValueRaw'] = (string)$booking['betrag'];
-								$rows[$rightrow]['rightValueMoney'] = $this->toFloat($booking['betrag']);
-								$rows[$rightrow]['rightPoints'] = $this->toFloat($booking['punkte']);
+								$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+								$rows[$rightrow]['rightPoints'] = $this->plugin->toFloat($booking['punkte']);
 								$record['sumValuesRight'] += $rows[$rightrow]['rightValueMoney'];
 								$record['sumPointsRight'] += $rows[$rightrow]['rightPoints'];
 								$rightrow++;
 								break;
 						}
-						$max_points += $this->toFloat($booking['punkte']);
+						$max_points += $this->plugin->toFloat($booking['punkte']);
 					}
 					$record['rows'] = $rows;
 					$record['countLeft'] = $leftrow;
@@ -587,14 +587,14 @@ class assAccountingQuestionPart
 			$row['leftAccountNum'] = (string)$child['leftAccountNum'];
 			$row['leftAccountText'] = (string)$child['leftAccountRaw']; // take the raw input as text
 			$row['leftValueRaw'] = (string)$child['leftValueRaw'];
-			$row['leftValueMoney'] = $this->toFloat($child['leftValueMoney']);
+			$row['leftValueMoney'] = $this->plugin->toFloat($child['leftValueMoney']);
 			$row['leftPoints'] = 0;
 
 			$row['rightAccountRaw'] = (string)$child['rightAccountRaw'];
 			$row['rightAccountNum'] = (string)$child['rightAccountNum'];
 			$row['rightAccountText'] = (string)$child['rightAccountRaw']; // take the raw input as text
 			$row['rightValueRaw'] = (string)$child['rightValueRaw'];
-			$row['rightValueMoney'] = $this->toFloat($child['rightValueMoney']);
+			$row['rightValueMoney'] = $this->plugin->toFloat($child['rightValueMoney']);
 			$row['rightPoints'] = 0;
 
 			// completely empty lines are omitted
@@ -662,7 +662,7 @@ class assAccountingQuestionPart
 					$crow = &$correct['rows'][$c];	// allow manipulation
 
 					if ($srow[$side.'AccountNum'] == $crow[$side.'AccountNum']
-						and $srow[$side.'ValueMoney'] == $crow[$side.'ValueMoney']
+						and $this->parent->equals($srow[$side.'ValueMoney'], $crow[$side.'ValueMoney'])
 						and empty($crow[$side.'Matched']))
 					{
 						$srow[$side.'Points'] = $crow[$side.'Points'];
@@ -722,7 +722,7 @@ class assAccountingQuestionPart
 		}
 
 		// give malus for different sum of values on both sides
-		if ($student['sumValuesLeft'] != $student['sumValuesRight'])
+		if (!$this->parent->equals($student['sumValuesLeft'],  $student['sumValuesRight']))
 		{
 			// limit the malus to the points reached so far
 			$student['malusSumsDiffer'] = max($correct['malusSumsDiffer'], -$totalPoints);
@@ -732,22 +732,5 @@ class assAccountingQuestionPart
 		// the total points for this part will not be negative
 		$this->working_data['sumPoints'] = $totalPoints;
 		return $totalPoints;
-	}
-
-	/**
-	 * Get the floating point value of a string
-	 * @param    string $a_string
-	 * @return float
-	 */
-	public function toFloat($a_string)
-	{
-		if ($a_string) {
-			$string = str_replace('.', '', $a_string);
-			$string = str_replace(' ', '', $string);
-			$string = str_replace(',', '.', $string);
-			return floatval($string);
-		} else {
-			return 0;
-		}
 	}
 }

@@ -62,13 +62,12 @@ class ilAccqstSwitchVar extends ilAccqstVariable
 
     /**
      * Get the names of all variables that are directly used by this variable
-     * @param string[] $names list of all available variable names
      * @return string[]
      */
-    public function getUsedNames($names)
+    public function getUsedNames()
     {
         $used = [];
-        foreach ($names as $name) {
+        foreach (array_keys($this->question->getVariables()) as $name) {
             $pattern = '{' . $name . '}';
 
             if ($this->check == $pattern) {
@@ -82,5 +81,51 @@ class ilAccqstSwitchVar extends ilAccqstVariable
         }
 
         return array_keys($used);
+    }
+
+    /**
+     * Calculate the value of the variable
+     *
+     * @param  integer  $depth calculation depth
+     * @return bool     value is calculated
+     */
+    public function calculateValue($depth = 0)
+    {
+        if (parent::calculateValue($depth)) {
+            // variable is already calculated
+            return true;
+        }
+
+        $this->check = $this->question->substituteVariables($this->check);
+
+        foreach ($this->cases as $case) {
+
+            $case['test'] = $this->plugin->toFloat($this->question->substituteVariables($case['test']));
+            $case['return'] = $this->plugin->toFloat($this->question->substituteVariables($case['return']));
+
+            switch ($case['type']) {
+
+                case 'value':
+                    if ($this->question->equals($this->check, $case['test'])) {
+                        $this->value = $case['return'];
+                        return true;
+                    }
+                    break;
+
+
+                case 'max':
+                    if ($this->check <= $case['test']) {
+                        $this->value = $case['return'];
+                        return true;
+                    }
+                    break;
+
+                case 'default':
+                    $this->value = $case['return'];
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

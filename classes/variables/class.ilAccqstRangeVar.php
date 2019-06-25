@@ -40,12 +40,35 @@ class ilAccqstRangeVar extends ilAccqstVariable
 
     /**
      * Get the names of all variables that are directly used by this variable
-     * @param string[] $names list of all available variable names
      * @return string[]
      */
-    public function getUsedNames($names)
+    public function getUsedNames()
     {
         return [];
     }
 
+    /**
+     * Calculate the value of the variable
+     *
+     * @param  integer  $depth calculation depth
+     * @return bool     value is calculated
+     */
+    public function calculateValue($depth = 0)
+    {
+        if (parent::calculateValue($depth)) {
+            // variable is already calculated
+            return true;
+        }
+
+        $min = $this->plugin->toFloat($this->min);
+        $max = $this->plugin->toFloat($this->max);
+        $step = $this->plugin->toFloat($this->step);
+
+        $maxsteps = (int) (($max - $min) / $step);
+        $num = rand(0, $maxsteps);
+
+       $this->value = (float) ( $min + $num * $step);
+
+       return true;
+    }
 }

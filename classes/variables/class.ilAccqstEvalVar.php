@@ -29,20 +29,42 @@ class ilAccqstEvalVar extends ilAccqstVariable
 
     /**
      * Get the names of all variables that are directly used by this variable
-     * @param string[] $names list of all available variable names
      * @return string[]
      */
-    public function getUsedNames($names)
+    public function getUsedNames()
     {
         $used = [];
-        foreach ($names as $name) {
+        foreach (array_keys($this->question->getVariables()) as $name) {
             $pattern = '{' . $name . '}';
-
             if (strpos($this->expression, $pattern) !== false) {
                 $used[$name] = true;
             }
         }
         return array_keys($used);
+    }
+
+
+    /**
+     * Calculate the value of the variable
+     *
+     * @param  integer  $depth calculation depth
+     * @return bool     value is calculated
+     * @see assFormulaQuestionResult::getReachedPoints()
+     */
+    public function calculateValue($depth = 0)
+    {
+        if (parent::calculateValue($depth)) {
+            // variable is already calculated
+            return true;
+        }
+
+        $this->expression = $this->question->substituteVariables($this->expression);
+
+        $math = new EvalMath();
+        $math->suppress_errors = true;
+        $this->value = $math->evaluate($this->expression);
+
+        return true;
     }
 
 }

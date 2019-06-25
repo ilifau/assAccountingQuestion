@@ -25,19 +25,24 @@ abstract class ilAccqstVariable
     /** @var mixed the currently selected or calculated value */
     public $value;
 
+    /** @var assAccountingQuestion */
+    protected $question;
+
     /** @var ilAssAccountingQuestionPlugin */
     protected $plugin;
 
     /**
      * Get variables from an XML definition
      * @param   string $xml
-     * @param   ilAssAccountingQuestionPlugin $plugin
+     * @param   assAccountingQuestion $question
      * @return self[]  (indexed by name)
      * @throws ilException
      */
-    public static function getVariablesFromXmlCode($xml, $plugin)
+    public static function getVariablesFromXmlCode($xml, $question)
     {
         $variables = [];
+
+        $plugin = $question->getPlugin();
 
         $xml = @simplexml_load_string($xml);
         if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables')) {
@@ -60,16 +65,16 @@ abstract class ilAccqstVariable
             switch ($type)
             {
                 case self::TYPE_RANGE:
-                    $variable = new ilAccqstRangeVar($name, $plugin);
+                    $variable = new ilAccqstRangeVar($name, $question);
                     break;
                 case self::TYPE_SELECT:
-                    $variable = new ilAccqstSelectVar($name, $plugin);
+                    $variable = new ilAccqstSelectVar($name, $question);
                     break;
                 case self::TYPE_SWITCH:
-                    $variable = new ilAccqstSwitchVar($name, $plugin);
+                    $variable = new ilAccqstSwitchVar($name, $question);
                     break;
                 case self::TYPE_EVAL:
-                    $variable = new ilAccqstEvalVar($name, $plugin);
+                    $variable = new ilAccqstEvalVar($name, $question);
                     break;
 
                 default:
@@ -88,12 +93,13 @@ abstract class ilAccqstVariable
     /**
      * ilAccqstVariable constructor.
      * @param string $name
-     * @param ilassAccountingQuestionPlugin $plugin
+     * @param assAccountingQuestion $question
      */
-    public function __construct($name, $plugin)
+    public function __construct($name, $question)
     {
         $this->name = $name;
-        $this->plugin = $plugin;
+        $this->question = $question;
+        $this->plugin = $question->getPlugin();
     }
 
     /**
@@ -107,21 +113,21 @@ abstract class ilAccqstVariable
 
     /**
      * Get the names of all variables that are directly used by this variable
-     * @param string[] $names list of all available variable names
      * @return string[]
      */
-    abstract public function getUsedNames($names);
+    abstract public function getUsedNames();
 
     /**
      * Calculate the value of the variable
      * Child classes should override this and call the parent at the beginning
      *
-     * @param self[] $variables
      * @param  integer  $depth calculation depth
-     * @return bool     value is already calculated
+     * @return bool     value is calculated
      */
-    public function calculateValue(&$variables, $depth = 0)
+    public function calculateValue($depth = 0)
     {
+        $variables = $this->question->getVariables();
+
         // probably a circular reference
         if ($depth > self::MAX_DEPTH) {
             throw new ilException($this->plugin->txt(sprintf('exceeded_calculation_depth', $this->name)));
@@ -133,14 +139,14 @@ abstract class ilAccqstVariable
         }
 
         // calculate all dependencies
-        foreach ($this->getUsedNames(array_keys($variables)) as $name) {
+        foreach ($this->getUsedNames() as $name) {
             if ($name == $this->name) {
                 throw new ilException($this->plugin->txt(sprintf('forbidden_self_reference', $this->name)));
             }
             if (!isset($variables[$name])) {
                 throw new ilException($this->plugin->txt(sprintf('unknown_variable_reference', $this->name, $name)));
             }
-            $variables[$name]->calculateValue($variables, $depth + 1);
+            $variables[$name]->calculateValue($depth + 1);
         }
 
         // child class must calculate
@@ -150,42 +156,20 @@ abstract class ilAccqstVariable
 
     /**
      * Get the floating point value of the variable
-     * @return float
+     * @return float|null
      */
     public function getFloat()
     {
-        if (is_float($this->value)) {
-            return $this->value;
-        }
-        elseif (is_int($this->value)) {
-            return (float) $this->value;
-        }
-        elseif (is_string($this->value)) {
-            $string = $this->value;
-            $string = str_replace('.', '', $string);
-            $string = str_replace(' ', '', $string);
-            $string = str_replace(',', '.', $string);
-            return floatval($string);
-        }
-        else {
-            return null;
-        }
+        return $this->plugin->toFloat($this->value);
     }
+
 
     /**
      * Get the string value of the variable
-     * @return string
+     * @return string|null
      */
     public function getString()
     {
-        if (is_string($this->value)) {
-            return $this->value;
-        }
-        elseif (is_int($this->value) || is_float($this->value)) {
-            return (string) $this->value;
-        }
-        else {
-            return null;
-        }
+        return $this->plugin->toString($this->value);
     }
 }
