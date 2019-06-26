@@ -39,7 +39,7 @@ class ilAccqstSwitchVar extends ilAccqstVariable
                     }
                     elseif (!empty($child['max'])) {
                         $case['type'] = 'max';
-                        $case['test'] = (string) $child['value'];
+                        $case['test'] = (string) $child['max'];
                         $case['return'] = trim((string) $child);
                     }
                     else {
@@ -96,13 +96,15 @@ class ilAccqstSwitchVar extends ilAccqstVariable
             return true;
         }
 
-        $this->check = $this->question->substituteVariables($this->check);
+        $this->check = $this->plugin->toFloat($this->question->substituteVariables($this->check));
+
+        foreach ($this->cases as $index => $case) {
+
+            $this->cases[$index]['test'] = $this->plugin->toFloat($this->question->substituteVariables($case['test']));
+            $this->cases[$index]['return'] = $this->plugin->toFloat($this->question->substituteVariables($case['return']));
+        }
 
         foreach ($this->cases as $case) {
-
-            $case['test'] = $this->plugin->toFloat($this->question->substituteVariables($case['test']));
-            $case['return'] = $this->plugin->toFloat($this->question->substituteVariables($case['return']));
-
             switch ($case['type']) {
 
                 case 'value':

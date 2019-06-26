@@ -58,7 +58,7 @@ class ilAccqstEvalVar extends ilAccqstVariable
             return true;
         }
 
-        $this->expression = $this->question->substituteVariables($this->expression);
+        $this->expression = $this->question->substituteVariables($this->expression, true);
 
         $math = new EvalMath();
         $math->suppress_errors = true;

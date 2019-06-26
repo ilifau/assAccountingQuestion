@@ -65,7 +65,7 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 
 
     /**
-     * Get a value as string decimals are separated by ,)
+     * Get a value as string (decimals are separated by ,)
      * @param mixed $value
      * @return string
      */
@@ -75,7 +75,7 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
             return $value;
         }
         elseif (is_int($value) || is_float($value)) {
-            $string = sprintf('%0.0f', $value);
+            $string = strval($value);
             $string = str_replace(' ', '', $string);
             $string = str_replace(',', '', $string);
             $string = str_replace('.', ',', $string);

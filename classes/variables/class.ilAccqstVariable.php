@@ -79,7 +79,7 @@ abstract class ilAccqstVariable
 
                 default:
                     // unknown type
-                    throw new ilException($plugin->txt(sprintf('unknown_variable_type', $name)));
+                    throw new ilException(sprintf($plugin->txt('unknown_variable_type'), $name));
             }
 
             $variable->initFromXmlElement($element, $plugin);
@@ -130,7 +130,7 @@ abstract class ilAccqstVariable
 
         // probably a circular reference
         if ($depth > self::MAX_DEPTH) {
-            throw new ilException($this->plugin->txt(sprintf('exceeded_calculation_depth', $this->name)));
+            throw new ilException(sprintf($this->plugin->txt('exceeded_calculation_depth'), $this->name));
         }
 
         // value is already calculated (e.g. by recursion from another variable)
@@ -141,10 +141,10 @@ abstract class ilAccqstVariable
         // calculate all dependencies
         foreach ($this->getUsedNames() as $name) {
             if ($name == $this->name) {
-                throw new ilException($this->plugin->txt(sprintf('forbidden_self_reference', $this->name)));
+                throw new ilException(sprintf($this->plugin->txt('forbidden_self_reference'), $this->name));
             }
             if (!isset($variables[$name])) {
-                throw new ilException($this->plugin->txt(sprintf('unknown_variable_reference', $this->name, $name)));
+                throw new ilException(sprintf($this->plugin->txt('unknown_variable_reference'), $this->name, $name));
             }
             $variables[$name]->calculateValue($depth + 1);
         }

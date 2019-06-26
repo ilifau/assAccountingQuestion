@@ -708,7 +708,7 @@ class assAccountingQuestion extends assQuestion
         try {
             foreach ($this->variables as $name => $var)
             {
-                if (!$var->calculateValue($this->variables)) {
+                if (!$var->calculateValue()) {
                     $this->analyze_error = sprintf($this->plugin->txt('var_not_calculated'), $var->name);
                     return false;
                 }
@@ -724,14 +724,22 @@ class assAccountingQuestion extends assQuestion
 
     /**
      * Substitute the referenced variables in a string
-     * @param $string
+     * @param string $string
+     * @param bool $numeric  use . as decimal point
      * @return $string
      */
-    public function substituteVariables($string) {
-        foreach ($this->variables as $name => $var) {
+    public function substituteVariables($string, $numeric = false) {
+        foreach ($this->getVariables() as $name => $var) {
             $pattern = '{' . $name . '}';
             if (strpos($string, $pattern) !== false) {
-                $string = str_replace($name, $var->getString(), $string);
+                if ($numeric) {
+                    $value = (string) $var->getFloat();
+                }
+                else {
+                    $value = $var->getString();
+                }
+
+                $string = str_replace($pattern, $value, $string);
             }
         }
         return $string;

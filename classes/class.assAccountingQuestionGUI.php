@@ -195,10 +195,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($this->object->getVariablesXML()));
         $tpl->setVariable("NAME", 'variables_xml');
         if ($this->plugin->isDebug()) {
+            if (!$this->object->calculateVariables()) {
+                $error = $this->object->getAnalyzeError() . "\n";
+            }
             $dump = print_r($this->object->getVariablesDump(), true);
             $dump = str_replace('{','&#123;', $dump);
             $dump = str_replace('}','&#125;', $dump);
-            $tpl->setVariable("DUMP", $dump);
+            $tpl->setVariable("DUMP", $error . $dump);
         }
         $item->setHTML($tpl->get());
         $form->addItem($item);
