@@ -70,10 +70,10 @@ class assAccountingQuestion extends assQuestion
 	private $analyze_error = '';
 
     /**
-     * Tolerance for comparing floating point values
-     * @var float
+     * Precision for comparing floating point values
+     * @var int
      */
-	private $tolerance = 0;
+	private $precision = 10;
 
 	/**
 	 * ilAccountingQuestion constructor
@@ -183,7 +183,8 @@ class assAccountingQuestion extends assQuestion
 			array(
 				'question_fi' => array('integer', $ilDB->quote($this->getId(), 'integer')),
 				'account_hash' => array('text', $hash),
-				'variables_def' => array('clob', $this->getVariablesXML())
+				'variables_def' => array('clob', $this->getVariablesXML()),
+                'prec' => array('integer', $this->getPrecision())
 			)
 		);
 
@@ -233,12 +234,13 @@ class assAccountingQuestion extends assQuestion
 
 		// get the question data
         $result = $ilDB->query(
-            "SELECT account_hash, variables_def FROM il_qpl_qst_accqst_data "
+            "SELECT account_hash, variables_def, prec FROM il_qpl_qst_accqst_data "
             . " WHERE question_fi =" . $ilDB->quote($question_id, 'integer'));
         $data = $ilDB->fetchAssoc($result);
 
         $hash = $data['account_hash'];
         $this->setVariablesXML($data['variables_def']);
+        $this->setPrecision($data['prec']);
 
         // get the hash value for accounts definition
 		$result = $ilDB->query(
@@ -745,6 +747,24 @@ class assAccountingQuestion extends assQuestion
         return $string;
     }
 
+    /**
+     * Get the calculation precision
+     * @return int
+     */
+    public function getPrecision()
+    {
+        return $this->precision;
+    }
+
+
+    /**
+     * Set the calculation precision
+     * @param int $precision
+     */
+    public function setPrecision($precision)
+    {
+        $this->precision = (int) $precision;
+    }
 
     /**
      * Check if two values are equal
@@ -754,7 +774,7 @@ class assAccountingQuestion extends assQuestion
      */
     public function equals($val1, $val2)
     {
-        return (abs($val1 - $val2) <= $this->tolerance);
+        return (abs($val1 - $val2) < (0.1 ** $this->getPrecision()));
     }
 
 

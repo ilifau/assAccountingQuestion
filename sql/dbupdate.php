@@ -125,4 +125,20 @@
         );
     }
 ?>
+<#6>
+<?php
+/*
+ * Create hash table for accounts definitions
+ */
+if(!$ilDB->tableColumnExists('il_qpl_qst_accqst_data', 'prec'))
+{
+    $ilDB->addTableColumn("il_qpl_qst_accqst_data", 'prec',
+        array(
+                'type' => 'integer',
+                'notnull' => true,
+                'default' => 10
+        )
+    );
+}
+?>
 

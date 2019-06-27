@@ -207,6 +207,17 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $form->addItem($item);
 
 
+        // calculation tolerance
+        $item = new ilNumberInputGUI($this->plugin->txt('precision'), 'precision');
+        $item->setInfo($this->plugin->txt('precision_info'));
+        $item->setSize(2);
+        $item->allowDecimals(false);
+        $item->setMinValue(0);
+        $item->setMaxValue(10, true);
+        $item->setValue($this->object->getPrecision());
+        $form->addItem($item);
+
+
         // add the existing booking parts
 		$parts = $this->object->getParts();
 		$i = 1;
@@ -369,6 +380,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
                     $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
                 }
             }
+
+            $this->object->setPrecision($_POST['precision']);
 
 			// sort the part positions
 			$positions = array();

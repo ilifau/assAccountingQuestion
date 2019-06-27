@@ -74,3 +74,5 @@ exceeded_calculation_depth#:#Die maximale Berechungstiefe wurde bei Variable "%s
 forbidden_self_reference#:#Die Variable "%s" darf sich nicht selbst referenzieren.
 unknown_variable_reference#:#Die Variable "%s" verwendet eine nicht definierte Variable "%s".
 var_not_calculated#:#Die Variable "%" konnte nicht berechnet werden.
+precision#:#Genauigkeit
+precision_info#:#Nachkommastellen, auf die bei Vergleichen zweier Werte geprüft wird. Bei 1 muss die Differenz kleiner 0,1 sein, bei 2 kleiner als 0,01.
