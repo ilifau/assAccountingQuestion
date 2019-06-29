@@ -142,7 +142,7 @@ class assAccountingQuestion extends assQuestion
 	}
 
 	/**
-	 * Saves a assFormulaQuestion object to a database
+	 * Saves an assAccountingQuestion object to a database
 	 *
 	 * @param    string        original id
 	 * @param    boolean        save all parts, too
@@ -686,19 +686,6 @@ class assAccountingQuestion extends assQuestion
 		return (array) $this->variables;
 	}
 
-    /**
-     * Get the list of variables
-     * @return array
-     */
-    public function getVariablesDump()
-    {
-        $dump = [];
-        foreach ($this->variables as $var) {
-            $dump[$var->name] = get_object_vars($var);
-        }
-
-        return $dump;
-    }
 
     /**
      * Calculate the values of all variables
@@ -732,28 +719,26 @@ class assAccountingQuestion extends assQuestion
      */
     public function initVariablesFromUserSolution($userSolution = [])
     {
+        $complete = false;
         foreach ($userSolution as $value1 => $value2) {
             if ($value1 == 'accqst_vars') {
                 $values = unserialize($value2);
-                foreach ($values as $name => $value) {
-                    if (isset($this->variables[$name])) {
-                        $this->variables[$name] = $value;
+
+                $complete = true;
+                foreach ($this->variables as $name => $var) {
+                    if (isset($values[$name])) {
+                        $var->value = $values[$name];
+                    }
+                    else {
+                        $complete = false;
                     }
                 }
-            }
-        }
-
-        $complete = true;
-        foreach ($this->variables as $variable) {
-            if (!isset($variable->value)) {
-                $complete = false;
             }
         }
 
         if (!$complete) {
             // be sure that variables have values if user solution is empty
             $this->calculateVariables();
-
         }
 
         return $complete;
@@ -768,9 +753,9 @@ class assAccountingQuestion extends assQuestion
     {
         $values = [];
         foreach ($this->variables as $name => $var) {
-            $values['name'] = $var->getString();
+            $values[$name] = $var->getString();
         }
-        $userSolution['accqst_var'] = serialize($values);
+        $userSolution['accqst_vars'] = serialize($values);
 
         return $userSolution;
     }
@@ -959,7 +944,7 @@ class assAccountingQuestion extends assQuestion
                 // former format before 1.3.1, stored from the flash input
                 // results are stored as key/value pairs
                 // format of value1 is 'accqst_key_123' with 123 being the part_id
-                //// key 'input' is the user input
+                // key 'input' is the user input
 				// keys 'student' and 'correct' are textual analyses, 'result' are the given points (not longer used)
 				$split = explode('_', $value1);
 			    $key = $split[1];
@@ -999,8 +984,11 @@ class assAccountingQuestion extends assQuestion
 			$pass = $this->getSolutionMaxPass($active_id);
 		}
 
-		$solution = $this->getSolutionStored($active_id, $pass, $authorizedSolution);
+        // variables are always authorized
+		$varsolution = $this->getSolutionStored($active_id, $pass, true);
+        $this->initVariablesFromUserSolution($varsolution);
 
+		$solution = $this->getSolutionStored($active_id, $pass, $authorizedSolution);
 		return $this->calculateReachedPointsForSolution($solution);
 	}
 
@@ -1011,7 +999,9 @@ class assAccountingQuestion extends assQuestion
 	 */
 	public function calculateReachedPointsFromPreviewSession(ilAssQuestionPreviewSession $previewSession)
 	{
-		return $this->calculateReachedPointsForSolution($previewSession->getParticipantsSolution());
+        $solution = (array) $previewSession->getParticipantsSolution();
+        $this->initVariablesFromUserSolution($solution);
+        return $this->calculateReachedPointsForSolution($solution);
 	}
 
 
@@ -1068,10 +1058,12 @@ class assAccountingQuestion extends assQuestion
 		}
 
 		// get the values to be stored
+        // this does not include the variables which have been saved before in assAccountingQuestionGUI::getTestOutput()
 		$userSolution = $this->getSolutionSubmit();
 
 		// update the solution with process lock
         $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(function() use ($active_id, $pass, $authorized, $userSolution) {
+            // variables are kept
             $this->removeCurrentSolution($active_id, $pass, $authorized);
             foreach ($userSolution as $value1 => $value2) {
                 $this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
@@ -1105,12 +1097,10 @@ class assAccountingQuestion extends assQuestion
 	}
 
     /**
-     * @param int $active_id
-     * @param int $pass
-     * @param bool|true $authorized
-     * @global ilDBInterface $ilDB
+     * Remove the current user solution
+     * Overwritten to keep the stored variables
      *
-     * @return int
+     * @inheritdoc
      */
     public function removeCurrentSolution($active_id, $pass, $authorized = true)
     {
@@ -1149,6 +1139,12 @@ class assAccountingQuestion extends assQuestion
         }
     }
 
+    /**
+     * Remove authorized and intermediate solution for a user in the test pass
+     * Overwritten to keep the stored variables
+     *
+     * @inheritdoc
+     */
     public function removeExistingSolutions($activeId, $pass)
     {
         global $ilDB;
@@ -1174,9 +1170,9 @@ class assAccountingQuestion extends assQuestion
 
     /**
      * Lookup if an authorized or intermediate solution exists
-     * @param 	int 		$activeId
-     * @param 	int 		$pass
-     * @return 	array		['authorized' => bool, 'intermediate' => bool]
+     * Overwritten to keep the stored variables
+     *
+     * @inheritdoc
      */
     public function lookupForExistingSolutions($activeId, $pass)
     {

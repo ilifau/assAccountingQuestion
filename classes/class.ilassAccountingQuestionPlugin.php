@@ -45,21 +45,23 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
      */
     public function toFloat($value = null)
     {
-        if (is_float($value)) {
-            return $value;
+        try {
+            if (is_float($value)) {
+                return $value;
+            }
+            elseif (is_int($value)) {
+                return (float) $value;
+            }
+            else {
+                $string = strval($value);
+                $string = str_replace(' ', '', $string);
+                $string = str_replace('.', '', $string);
+                $string = str_replace(',', '.', $string);
+                return floatval($string);
+            }
         }
-        elseif (is_int($value)) {
-            return (float) $value;
-        }
-        elseif (is_string($value)) {
-            $string = $value;
-            $string = str_replace(' ', '', $string);
-            $string = str_replace('.', '', $string);
-            $string = str_replace(',', '.', $string);
-            return floatval($string);
-        }
-        else {
-            return 0;
+        catch (Exception $e) {
+            return '';
         }
     }
 
@@ -71,17 +73,19 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
      */
     public static function toString($value = null)
     {
-        if (is_string($value)) {
-            return $value;
+        try {
+            if (is_string($value)) {
+                return $value;
+            }
+            else {
+                $string = strval($value);
+                $string = str_replace(' ', '', $string);
+                $string = str_replace(',', '', $string);
+                $string = str_replace('.', ',', $string);
+                return $string;
+            }
         }
-        elseif (is_int($value) || is_float($value)) {
-            $string = strval($value);
-            $string = str_replace(' ', '', $string);
-            $string = str_replace(',', '', $string);
-            $string = str_replace('.', ',', $string);
-            return $string;
-        }
-        else {
+        catch (Exception $e) {
             return '';
         }
     }

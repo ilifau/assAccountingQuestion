@@ -377,9 +377,6 @@ class assAccountingQuestionPart
 		}
 		$type = $xml->getName();
 
-		// load the accounts data in the question
-		$this->parent->getAccountsData();
-
 		// init booking data (not yet saved in db)
 		$data = array();
 

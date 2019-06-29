@@ -4,8 +4,6 @@
  * GPLv2, see LICENSE
  */
 
-include_once "./Modules/Test/classes/inc.AssessmentConstants.php";
-
 /**
  * Accounting question GUI representation
  *
@@ -28,8 +26,12 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	const URL_SUFFIX = "?css_version=1.5.0";
 
+    /** @var ilassAccountingQuestionPlugin */
+	protected $plugin = null;
 
-	var $plugin = null;
+
+	/** @var ilPropertyFormGUI */
+    protected $form;
 
 	/**
 	 * assAccountingQuestionGUI constructor
@@ -151,11 +153,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// title, author, description, question, working time (assessment mode)
 		$this->addBasicQuestionFormProperties($form);
 
-		if ($this->object->getId()) {
-			$hidden = new ilHiddenInputGUI("", "ID");
-			$hidden->setValue($this->object->getId());
-			$form->addItem($hidden);
-		}
+		// maximum points
+		$item = new ilNonEditableValueGUI($this->plugin->txt('max_score'));
+		$item->setValue($this->object->getMaximumPoints());
+		$form->addItem($item);
 
 		// accounts XML definition
 		$item = new ilCustomInputGUI($this->plugin->txt('accounts_xml'));
@@ -196,7 +197,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
             if (!$this->object->calculateVariables()) {
                 $error = $this->object->getAnalyzeError() . "\n";
             }
-            $dump = print_r($this->object->getVariablesDump(), true);
+            $dump = [];
+            foreach ($this->object->getVariables() as $name => $var) {
+                $dump[$var->name] = get_object_vars($var);
+            }
+            $dump = print_r($dump, true);
             $dump = str_replace('{','&#123;', $dump);
             $dump = str_replace('}','&#125;', $dump);
             $tpl->setVariable("DUMP", $error . $dump);
@@ -244,10 +249,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * add the properties of a question part to the form
 	 *
 	 * @param ilPropertyFormGUI $form
-	 * @param assAccountingQuestionPart $oart_obj
+	 * @param assAccountingQuestionPart $part_obj
 	 * @param integer  $counter of the question part
 	 */
-	private function initPartProperties($form, $part_obj = null, $counter = "1")
+	private function initPartProperties($form, $part_obj = null, $counter = 1)
 	{
 		// Use a dummy part object for a new booking definition
 		if (!isset($part_obj)) {
@@ -274,7 +279,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 		$form->addItem($item);
 
-		// Text
+
+        // Maximum Points
+        $item = new ilNonEditableValueGUI($this->plugin->txt('max_score'));
+        $item->setValue($part_obj->getMaxPoints());
+        $form->addItem($item);
+
+
+        // Text
 		$item = new ilTextAreaInputGUI($this->plugin->txt("question_part"), 'text_' . $part_obj->getPartId());
 		$item->setValue($this->object->prepareTextareaOutput($part_obj->getText()));
 		$item->setRows(10);
@@ -287,7 +299,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$item->addButton("pastelatex");
 			$item->setRTESupport($this->object->getId(), "qpl", "assessment");
 		} else {
-			$item->setRteTags(self::getSelfAssessmentTags());
+			$item->setRteTags(ilAssSelfAssessmentQuestionFormatter::getSelfAssessmentTags());
 			$item->setUseTagsForRteOnly(false);
 		}
 		$form->addItem($item);
@@ -484,7 +496,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				if (is_null($pass)) $pass = ilObjTest::_getPass($active_id);
 			}
 
-			// variables are always authorized
+
+			// get the stored variables (always authorized)
+            // init and store them if they were not yet initialized
             $varsolution = $this->object->getSolutionStored($active_id, $pass, true);
 			if (!$this->object->initVariablesFromUserSolution($varsolution)) {
 			    foreach ($this->object->addVariablesToUserSolution() as $value1 => $value2) {
@@ -521,6 +535,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		// get the question output template
 		$tpl = $this->plugin->getTemplate("tpl.il_as_qpl_accqst_output.html");
+
+		if ($this->plugin->isDebug()) {
+		    $debug = [];
+		    foreach ($this->object->getVariables() as $name => $var) {
+		        $debug[$name] = $var->getString();
+            }
+            $tpl->setVariable('DEBUG', print_r($debug, true));
+        }
 
 		// general question text
 		$questiontext = $this->object->getQuestion();
@@ -602,9 +624,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	{
 		if (is_object($this->getPreviewSession()))
 		{
-			// show interactive preview
+            // get or create the variable values
 			$solution = (array) $this->getPreviewSession()->getParticipantsSolution();
-			$this->object->initVariablesFromUserSolution($solution);
+
+            if (!$this->object->initVariablesFromUserSolution($solution)) {
+                $solution = $this->object->addVariablesToUserSolution($solution);
+                $this->getPreviewSession()->setParticipantsSolution($solution);
+            }
+            // show interactive preview
 			$questionoutput = $this->getQuestionOutput($solution);
 		}
 		else
@@ -982,19 +1009,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 
 	/**
-	 * Saves the feedback for a question
-	 */
-	public function saveFeedback()
-	{
-		include_once "./Services/AdvancedEditing/classes/class.ilObjAdvancedEditing.php";
-		$errors = $this->feedback(true);
-		$this->object->saveFeedbackGeneric(0, $_POST["feedback_incomplete"]);
-		$this->object->saveFeedbackGeneric(1, $_POST["feedback_complete"]);
-		$this->object->cleanupMediaObjectUsage();
-		parent::saveFeedback();
-	}
-
-	/**
 	 * Returns the answer specific feedback for the question
 	 *
 	 * @param integer $active_id Active ID of the user
@@ -1088,11 +1102,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$this->addTab_QuestionPreview($ilTabs);
 		}
 
-		$force_active = false;
 		if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
 			$url = "";
 			if ($classname) $url = $this->ctrl->getLinkTargetByClass($classname, "editQuestion");
-			$commands = $_POST["cmd"];
 			// edit question properties
 			$ilTabs->addTarget("edit_properties",
 				$url,
