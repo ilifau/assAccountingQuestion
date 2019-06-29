@@ -23,7 +23,7 @@ abstract class ilAccqstVariable
     public $name;
 
     /** @var mixed the currently selected or calculated value */
-    public $value;
+    public $value = null;
 
     /** @var assAccountingQuestion */
     protected $question;

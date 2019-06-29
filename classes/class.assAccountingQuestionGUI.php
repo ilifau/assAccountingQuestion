@@ -28,11 +28,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	const URL_SUFFIX = "?css_version=1.5.0";
 
-	/** @var ilassAccountingQuestionPlugin */
+
 	var $plugin = null;
 
-	/** @var ilPropertyFormGUI */
-	var $form = null;
 	/**
 	 * assAccountingQuestionGUI constructor
 	 *
@@ -485,7 +483,16 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			{
 				if (is_null($pass)) $pass = ilObjTest::_getPass($active_id);
 			}
-			// get preferrably the intermediate solution
+
+			// variables are always authorized
+            $varsolution = $this->object->getSolutionStored($active_id, $pass, true);
+			if (!$this->object->initVariablesFromUserSolution($varsolution)) {
+			    foreach ($this->object->addVariablesToUserSolution() as $value1 => $value2) {
+                    $this->object->saveCurrentSolution($active_id, $pass, $value1, $value2, true);
+                }
+            }
+
+            // get preferrably the intermediate solution
 			$solution = $this->object->getSolutionStored($active_id, $pass, null);
 		}
 
@@ -498,8 +505,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Get the html output of the question for different usages (preview, test)
 	 *
-	 * @param    array            values of the user's solution
-	 *
+	 * @param  array   $a_solution  value1 => value2
+	 * @return string
 	 * @see assAccountingQuestion::getSolutionSubmit()
 	 */
 	private function getQuestionOutput($a_solution = array())
@@ -525,10 +532,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		$tpl->setVariable("QUESTION_ID", $this->object->getId());
 
+		$solutionParts = $this->object->getSolutionParts($a_solution);
 		foreach ($parts as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($a_solution[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id]);
 			$w_data = $part_obj->getWorkingData();
 
 			$tpl->setCurrentBlock('question_part');
@@ -588,18 +596,21 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * (called from ilObjQuestionPoolGUI)
 	 *
 	 * @param boolean    show only the question instead of embedding page (true/false)
+     * @return string
 	 */
 	public function getPreview($show_question_only = FALSE, $showInlineFeedback = false)
 	{
 		if (is_object($this->getPreviewSession()))
 		{
 			// show interactive preview
-			$user_solution = (array)$this->getPreviewSession()->getParticipantsSolution();
-			$questionoutput = $this->getQuestionOutput($user_solution);
+			$solution = (array) $this->getPreviewSession()->getParticipantsSolution();
+			$this->object->initVariablesFromUserSolution($solution);
+			$questionoutput = $this->getQuestionOutput($solution);
 		}
 		else
 		{
 			// show empty tables for printing or editing
+            $this->object->calculateVariables();
 			$questionoutput = $this->getPaperOutput();
 		}
 
@@ -650,6 +661,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * Get the HTML output of an empty part
 	 *
 	 * @param array        part data
+     * @return string
 	 */
 	private function getPaperTable($data)
 	{
@@ -765,6 +777,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			(array) $this->getPreviewSession()->getParticipantsSolution() :
 			(array) $this->object->getSolutionStored($active_id, $pass, true);
 
+		$solutionParts = $this->object->getSolutionParts($solution);
+		$this->object->initVariablesFromUserSolution($solution);
 
 		// get the output template
 		 $template = $this->plugin->getTemplate("tpl.il_as_qpl_accqst_output_solution.html");
@@ -779,7 +793,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 			else
 			{
-				$part_obj->setWorkingXML($solution[$part_id]);
+				$part_obj->setWorkingXML($solutionParts[$part_id]);
 				$part_obj->calculateReachedPoints();
 				$table_data = $part_obj->getWorkingData();
 			}
@@ -872,6 +886,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 *
 	 * @param array        part data (user input or correct solution)
 	 * @param boolean    show the points of the part data
+     * @return string
 	 */
 	private function getSolutionTable($data, $a_show_points = false)
 	{
@@ -1013,13 +1028,16 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			(array) $this->getPreviewSession()->getParticipantsSolution() :
 			(array) $this->object->getSolutionStored($active_id, $pass, true);
 
+		$solutionParts = $this->object->getSolutionParts($solution);
+		$this->object->initVariablesFromUserSolution($solution);
+
 		// get the output template
 		$template = $this->plugin->getTemplate("tpl.il_as_qpl_accqst_output_solution.html");
 
 		foreach ($this->object->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($solution[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id]);
 			$part_obj->calculateReachedPoints();
 			$student_data = $part_obj->getWorkingData();
 

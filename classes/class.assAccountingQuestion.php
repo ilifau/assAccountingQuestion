@@ -725,6 +725,58 @@ class assAccountingQuestion extends assQuestion
     }
 
     /**
+     * Set the values of the variables from a user solution
+     * Otherwise calculate them
+     * @param array $userSolution value1 => value2
+     * @return bool the variables are complete in the user solution
+     */
+    public function initVariablesFromUserSolution($userSolution = [])
+    {
+        foreach ($userSolution as $value1 => $value2) {
+            if ($value1 == 'accqst_vars') {
+                $values = unserialize($value2);
+                foreach ($values as $name => $value) {
+                    if (isset($this->variables[$name])) {
+                        $this->variables[$name] = $value;
+                    }
+                }
+            }
+        }
+
+        $complete = true;
+        foreach ($this->variables as $variable) {
+            if (!isset($variable->value)) {
+                $complete = false;
+            }
+        }
+
+        if (!$complete) {
+            // be sure that variables have values if user solution is empty
+            $this->calculateVariables();
+
+        }
+
+        return $complete;
+    }
+
+    /**
+     * Add variables to a user solution
+     * @param array $userSolution
+     * @return array value1 => value2
+     */
+    public function addVariablesToUserSolution($userSolution = [])
+    {
+        $values = [];
+        foreach ($this->variables as $name => $var) {
+            $values['name'] = $var->getString();
+        }
+        $userSolution['accqst_var'] = serialize($values);
+
+        return $userSolution;
+    }
+
+
+    /**
      * Substitute the referenced variables in a string
      * @param string $string
      * @param bool $numeric  use . as decimal point
@@ -802,11 +854,11 @@ class assAccountingQuestion extends assQuestion
 	 *        saveWorkingData()
 	 *        calculateReachedPointsForSolution()
 	 *
-	 * @return    array    part_id => xml string
+	 * @return    array    value1 => value2
 	 */
 	protected function getSolutionSubmit()
 	{
-		$solution = array();
+		$inputs = [];
 
 		foreach ($this->getParts() as $part_obj)
 		{
@@ -831,10 +883,13 @@ class assAccountingQuestion extends assQuestion
 			}
 			$xml .= '</input>';
 
-			$solution[$part_id] = $xml;
+            $inputs[] = $xml;
 		}
 
-		return $solution;
+        $value1 = 'accqst_input';						    // key to idenify the storage format
+        $value2 = implode('<partBreak />', $inputs);	// concatenated xml inputs for all parts
+
+        return [$value1 => $value2];
 	}
 
 
@@ -849,15 +904,10 @@ class assAccountingQuestion extends assQuestion
 	 * @param	integer		active id of the user
 	 * @param	integer		test pass
 	 * @param	mixed		true: get authorized solution, false: get intermediate solution, null: prefer intermediate
-	 * @param	boolean		use return format prior to version 1.3.1
-	 * 						(needed for class.ilSpecificPatches::compareAccountingQuestionResults)
-	 * @return  array    	part_id => xml string (new format)
+	 * @return  array    	value1 => value2
 	 */
-	public function getSolutionStored($active_id, $pass, $authorized = null, $old_format = false)
+	public function getSolutionStored($active_id, $pass, $authorized = null)
 	{
-		$solution = array();
-		$old_solution = array();
-
 		if (is_null($authorized))
 		{
 			// assAccountingQuestionGUI::getTestOutput() takes the latest storage
@@ -869,53 +919,60 @@ class assAccountingQuestion extends assQuestion
 			$rows = $this->getSolutionValues($active_id, $pass, $authorized);
 		}
 
+		$userSolution = array();
 		foreach ($rows as $row)
 		{
-			// new format since 1.3.1
-			// all inputs are in one row, concatenated by '<partBreak />'
-			// @see self::saveWorkingData()
-			if ($row['value1'] == 'accqst_input')
-			{
-				$inputs = explode('<partBreak />', $row['value2']);
+			$userSolution[$row['value1']] = $row['value2'];
+		}
+
+		return $userSolution;
+	}
+
+	/**
+	 * Get the XML parts of a user solution
+	 * @param array $userSolution	value1 => value2
+	 * @return array part_id =>  xml string
+	 */
+	public function getSolutionParts($userSolution)
+	{
+		$parts = array();
+
+		foreach ($userSolution as $value1 => $value2)
+		{
+			if ($value1 == 'accqst_input') {
+                // new format since 1.3.1
+                // all inputs are in one row, concatenated by '<partBreak />'
+                // @see self::saveWorkingData()
+				$inputs = explode('<partBreak />', $value2);
 				foreach ($inputs as $input)
 				{
 					$matches = array();
 					if (preg_match('/part_id="([0-9]+)"/', $input, $matches))
 					{
 						$part_id = $matches[1];
-						$solution[$part_id] = $input;
+                        $parts[$part_id] = $input;
 					}
 				}
 			}
-
-			// former format before 1.3.1, stored from the flash input
-			// results are stored as key/value pairs
-			// format of value1 is 'accqst_key_123' with 123 being the part_id
-			// 'student' and 'correct' are textual analyses
-			// 'result' are the given points
-			$split = explode('_', $row['value1']);
-			$key = $split[1];
-			$part_id = $split[2];
-
-			switch ($key)
+			else
 			{
-				case 'input':
-					$solution[$part_id] = $row['value2'];
-					$old_solution[$part_id][$key] = $row['value2'];
-					break;
+                // former format before 1.3.1, stored from the flash input
+                // results are stored as key/value pairs
+                // format of value1 is 'accqst_key_123' with 123 being the part_id
+                //// key 'input' is the user input
+				// keys 'student' and 'correct' are textual analyses, 'result' are the given points (not longer used)
+				$split = explode('_', $value1);
+			    $key = $split[1];
+			    $part_id = $split[2];
 
-				case 'student':
-				case 'correct':
-					$old_solution[$part_id][$key] = $row['value2'];
-					break;
-
-				case 'result':
-					$old_solution[$part_id][$key] = $row['points'];
-					break;
+				if ($key == 'input')
+			    {
+					$parts[$part_id] = $value2;
+				}
 			}
 		}
 
-		return $old_format ? $old_solution : $solution;
+		return $parts;
 	}
 
 
@@ -961,16 +1018,17 @@ class assAccountingQuestion extends assQuestion
 	/**
 	 * Calculate the reached points from a solution array
 	 *
-	 * @param   array    part_id => xml string
+	 * @param   array    value1 => value2
 	 * @return  float    reached points
 	 */
 	protected function calculateReachedPointsForSolution($solution)
 	{
+	    $solutionParts = $this->getSolutionParts($solution);
 		$points = 0;
 		foreach ($this->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($solution[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id]);
 			$points += $part_obj->calculateReachedPoints();
 		}
 
@@ -985,7 +1043,10 @@ class assAccountingQuestion extends assQuestion
 	 */
 	protected function savePreviewData(ilAssQuestionPreviewSession $previewSession)
 	{
-		$previewSession->setParticipantsSolution($this->getSolutionSubmit());
+        $this->initVariablesFromUserSolution($previewSession->getParticipantsSolution());
+        $userSolution = $this->addVariablesToUserSolution($this->getSolutionSubmit());
+
+		$previewSession->setParticipantsSolution($userSolution);
 	}
 
 
@@ -1007,19 +1068,14 @@ class assAccountingQuestion extends assQuestion
 		}
 
 		// get the values to be stored
-		$solution = $this->getSolutionSubmit();
-		$inputs = array();
-		foreach ($solution as $part_id => $input)
-		{
-			$inputs[] =  $input;
-		}
-		$value1 = 'accqst_input';						// key to idenify the storage format
-		$value2 = implode('<partBreak />', $inputs);	// concatenated xml inputs for all parts
+		$userSolution = $this->getSolutionSubmit();
 
 		// update the solution with process lock
-        $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(function() use ($active_id, $pass, $authorized, $value1, $value2) {
+        $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(function() use ($active_id, $pass, $authorized, $userSolution) {
             $this->removeCurrentSolution($active_id, $pass, $authorized);
-            $this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
+            foreach ($userSolution as $value1 => $value2) {
+                $this->saveCurrentSolution($active_id, $pass, $value1, $value2, $authorized);
+            }
         });
 
 		// log the saving, we assume that values have been entered
@@ -1030,6 +1086,7 @@ class assAccountingQuestion extends assQuestion
 
 		return true;
 	}
+
 
 
 	/**
@@ -1047,8 +1104,125 @@ class assAccountingQuestion extends assQuestion
 		// nothing to rework!
 	}
 
+    /**
+     * @param int $active_id
+     * @param int $pass
+     * @param bool|true $authorized
+     * @global ilDBInterface $ilDB
+     *
+     * @return int
+     */
+    public function removeCurrentSolution($active_id, $pass, $authorized = true)
+    {
+        global $ilDB;
 
-	/**
+        if($this->getStep() !== NULL)
+        {
+            $query = "
+				DELETE FROM tst_solutions
+				WHERE active_fi = %s
+				AND question_fi = %s
+				AND pass = %s
+				AND step = %s
+				AND authorized = %s
+				AND value1 <> 'accqst_vars'
+			";
+
+            return $ilDB->manipulateF($query, array('integer', 'integer', 'integer', 'integer', 'integer'),
+                array($active_id, $this->getId(), $pass, $this->getStep(), (int)$authorized)
+            );
+        }
+        else
+        {
+            $query = "
+				DELETE FROM tst_solutions
+				WHERE active_fi = %s
+				AND question_fi = %s
+				AND pass = %s
+				AND authorized = %s
+				AND value1 <> 'accqst_vars'
+			";
+
+            return $ilDB->manipulateF($query, array('integer', 'integer', 'integer', 'integer'),
+                array($active_id, $this->getId(), $pass, (int)$authorized)
+            );
+        }
+    }
+
+    public function removeExistingSolutions($activeId, $pass)
+    {
+        global $ilDB;
+
+        $query = "
+			DELETE FROM tst_solutions
+			WHERE active_fi = %s
+			AND question_fi = %s
+			AND pass = %s
+			AND value1 <> 'accqst_vars'
+		";
+
+        if( $this->getStep() !== NULL )
+        {
+            $query .= " AND step = " . $ilDB->quote((int)$this->getStep(), 'integer') . " ";
+        }
+
+        return $ilDB->manipulateF($query, array('integer', 'integer', 'integer'),
+            array($activeId, $this->getId(), $pass)
+        );
+    }
+
+
+    /**
+     * Lookup if an authorized or intermediate solution exists
+     * @param 	int 		$activeId
+     * @param 	int 		$pass
+     * @return 	array		['authorized' => bool, 'intermediate' => bool]
+     */
+    public function lookupForExistingSolutions($activeId, $pass)
+    {
+        /** @var $ilDB \ilDBInterface  */
+        global $ilDB;
+
+        $return = array(
+            'authorized' => false,
+            'intermediate' => false
+        );
+
+        $query = "
+			SELECT authorized, COUNT(*) cnt
+			FROM tst_solutions
+			WHERE active_fi = %s
+			AND question_fi = %s
+			AND pass = %s
+			AND value1 <> 'accqst_vars'
+		";
+
+        if( $this->getStep() !== NULL )
+        {
+            $query .= " AND step = " . $ilDB->quote((int)$this->getStep(), 'integer') . " ";
+        }
+
+        $query .= "
+			GROUP BY authorized
+		";
+
+        $result = $ilDB->queryF($query, array('integer', 'integer', 'integer'), array($activeId, $this->getId(), $pass));
+
+        while ($row = $ilDB->fetchAssoc($result))
+        {
+            if ($row['authorized']) {
+                $return['authorized'] = $row['cnt'] > 0;
+            }
+            else
+            {
+                $return['intermediate'] = $row['cnt'] > 0;
+            }
+        }
+        return $return;
+    }
+
+
+    /**
 	 * Returns the question type of the question
 	 *
 	 * @return string The question type of the question
@@ -1096,7 +1270,8 @@ class assAccountingQuestion extends assQuestion
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(0) . $startrow, $this->plugin->txt($this->getQuestionType()));
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(1) . $startrow, $this->getTitle());
 
-		$solutions = $this->getSolutionStored($active_id, $pass, true);
+		$solution = $this->getSolutionStored($active_id, $pass, true);
+		$solutionParts = $this->getSolutionParts($solution);
 
 		$row = $startrow + 1;
 		$part = 1;
@@ -1108,7 +1283,7 @@ class assAccountingQuestion extends assQuestion
             $worksheet->setBold($worksheet->getColumnCoord(0) . $row);
 
 			// the excel fields can be filled from the stored input
-			$part_obj->setWorkingXML($solutions[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id]);
 			$part_obj->calculateReachedPoints();
 			$data = $part_obj->getWorkingData();
 
