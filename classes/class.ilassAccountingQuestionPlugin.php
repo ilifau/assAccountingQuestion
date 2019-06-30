@@ -39,24 +39,24 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 
 
     /**
-     * Get a value as floating point (decimals are separated by ,)
+     * Get a value as floating point
      * @param mixed $value
+     * @param string $separator (decimal separator)
      * @return float
      */
-    public function toFloat($value = null)
+    public function toFloat($value = null, $separator = ',')
     {
         try {
-            if (is_float($value)) {
-                return $value;
-            }
-            elseif (is_int($value)) {
+            if (is_float($value) || is_int($value)) {
                 return (float) $value;
             }
             else {
+                $nosep = ($separator == ',' ? '.' : ',');
+
                 $string = strval($value);
                 $string = str_replace(' ', '', $string);
-                $string = str_replace('.', '', $string);
-                $string = str_replace(',', '.', $string);
+                $string = str_replace($nosep, '', $string);
+                $string = str_replace($separator, '.', $string);
                 return floatval($string);
             }
         }
@@ -69,18 +69,23 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
     /**
      * Get a value as string (decimals are separated by ,)
      * @param mixed $value
+     * @param int   $precision for showing numbers
      * @return string
      */
-    public static function toString($value = null)
+    public function toString($value = null,  $precision = null)
     {
         try {
             if (is_string($value)) {
                 return $value;
             }
             else {
-                $string = strval($value);
+                if (is_float($value) && is_int($precision)) {
+                    $string = sprintf('%.'.$precision.'f', $value);
+                }
+                else {
+                    $string = strval($value);
+                }
                 $string = str_replace(' ', '', $string);
-                $string = str_replace(',', '', $string);
                 $string = str_replace('.', ',', $string);
                 return $string;
             }

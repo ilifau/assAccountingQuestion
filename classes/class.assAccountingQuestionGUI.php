@@ -539,7 +539,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		if ($this->plugin->isDebug()) {
 		    $debug = [];
 		    foreach ($this->object->getVariables() as $name => $var) {
-		        $debug[$name] = $var->getString();
+		        $debug[$name] = $var->value;
             }
             $tpl->setVariable('DEBUG', print_r($debug, true));
         }

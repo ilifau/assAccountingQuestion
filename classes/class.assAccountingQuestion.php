@@ -15,6 +15,10 @@ include_once "./Modules/Test/classes/inc.AssessmentConstants.php";
  */
 class assAccountingQuestion extends assQuestion
 {
+    const SUB_NUMERIC = 'numeric';  // Substitute a variable with float value as numeric string for further calculations (use . for decimals)
+    const SUB_DISPLAY = 'display';  // Substitute a variable with float value rounded with given precision for display
+    const SUB_DEFAULT = 'default';  // Substitute a variable with float value as string (use , for decimals)
+
 	/**
 	 * Reference of the plugin object
 	 * @var object
@@ -73,7 +77,7 @@ class assAccountingQuestion extends assQuestion
      * Precision for comparing floating point values
      * @var int
      */
-	private $precision = 10;
+	private $precision = 2;
 
 	/**
 	 * ilAccountingQuestion constructor
@@ -715,7 +719,7 @@ class assAccountingQuestion extends assQuestion
      * Set the values of the variables from a user solution
      * Otherwise calculate them
      * @param array $userSolution value1 => value2
-     * @return bool the variables are complete in the user solution
+     * @return bool the variables were complete in the user solution
      */
     public function initVariablesFromUserSolution($userSolution = [])
     {
@@ -736,9 +740,16 @@ class assAccountingQuestion extends assQuestion
             }
         }
 
+        // be sure that variables have values
         if (!$complete) {
-            // be sure that variables have values if user solution is empty
             $this->calculateVariables();
+        }
+
+        // apply the variables to the question and its parts
+        $this->setQuestion($this->substituteVariables($this->getQuestion(), self::SUB_DISPLAY));
+        foreach ($this->getParts() as $partObj) {
+            $partObj->setText($this->substituteVariables($partObj->getText(), assAccountingQuestion::SUB_DISPLAY));
+            $partObj->setBookingXML($partObj->getBookingXML(), true);
         }
 
         return $complete;
@@ -753,7 +764,7 @@ class assAccountingQuestion extends assQuestion
     {
         $values = [];
         foreach ($this->variables as $name => $var) {
-            $values[$name] = $var->getString();
+            $values[$name] = $var->value;
         }
         $userSolution['accqst_vars'] = serialize($values);
 
@@ -764,18 +775,23 @@ class assAccountingQuestion extends assQuestion
     /**
      * Substitute the referenced variables in a string
      * @param string $string
-     * @param bool $numeric  use . as decimal point
+     * @param string $mode
      * @return $string
      */
-    public function substituteVariables($string, $numeric = false) {
+    public function substituteVariables($string, $mode = self::SUB_DEFAULT) {
         foreach ($this->getVariables() as $name => $var) {
             $pattern = '{' . $name . '}';
             if (strpos($string, $pattern) !== false) {
-                if ($numeric) {
-                    $value = (string) $var->getFloat();
-                }
-                else {
-                    $value = $var->getString();
+                switch ($mode) {
+                    case self::SUB_NUMERIC:
+                        $value = (string) $var->getFloat();
+                        break;
+                    case self::SUB_DISPLAY:
+                        $value = $var->getDisplay();
+                        break;
+                    case self::SUB_DEFAULT:
+                    default:
+                        $value = $var->getString();
                 }
 
                 $string = str_replace($pattern, $value, $string);

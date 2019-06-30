@@ -101,7 +101,7 @@ class ilAccqstSwitchVar extends ilAccqstVariable
         foreach ($this->cases as $index => $case) {
 
             $this->cases[$index]['test'] = $this->plugin->toFloat($this->question->substituteVariables($case['test']));
-            $this->cases[$index]['return'] = $this->plugin->toFloat($this->question->substituteVariables($case['return']));
+            $this->cases[$index]['return'] = $this->question->substituteVariables($case['return']);
         }
 
         foreach ($this->cases as $case) {

@@ -58,11 +58,11 @@ class ilAccqstEvalVar extends ilAccqstVariable
             return true;
         }
 
-        $this->expression = $this->question->substituteVariables($this->expression, true);
+        $this->expression = $this->question->substituteVariables($this->expression, assAccountingQuestion::SUB_NUMERIC);
 
         $math = new EvalMath();
         $math->suppress_errors = true;
-        $this->value = $math->evaluate($this->expression);
+        $this->value = $this->plugin->toFloat($math->evaluate($this->expression), '.');
 
         return true;
     }

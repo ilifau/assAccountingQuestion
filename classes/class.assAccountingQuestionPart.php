@@ -358,16 +358,17 @@ class assAccountingQuestionPart
 
 
 	/**
-	 * Analyze a booking definition
+	 * Set a booking definition
 	 *
 	 * This should be done whenever the booking is changed
 	 * Maximum points and display lines may be set for storing in db
 	 * Other data is set in class variable 'booking_data'
 	 *
-	 * @param    string        xml booking definition
+	 * @param    string          $a_booking_xml
+     * @param    boolean         $a_substitute_variables
 	 * @return    boolean        booking definition is ok (true/false)
 	 */
-	public function setBookingXML($a_booking_xml)
+	public function setBookingXML($a_booking_xml, $a_substitute_variables = false)
 	{
 		// load the xml object
 		$xml = @simplexml_load_string($a_booking_xml);
@@ -418,15 +419,22 @@ class assAccountingQuestionPart
 				$leftrow = 0;
 				$rightrow = 0;
 				foreach ($xml->children() as $booking) {
+
+                    $konto = (string)$booking['konto'];
+                    $betrag = (string) $booking['betrag'];
+				    if ($a_substitute_variables) {
+				        $konto = $this->parent->substituteVariables($konto);
+				        $betrag = $this->parent->substituteVariables($betrag);
+                    }
 					$account = $this->parent->getAccount((string)$booking['konto']);
 
 					switch ($booking->getName()) {
 						case 'links':
-							$rows[$leftrow]['leftAccountRaw'] = (string)$booking['konto'];
+							$rows[$leftrow]['leftAccountRaw'] = $konto;
 							$rows[$leftrow]['leftAccountNum'] = $account['number'];
 							$rows[$leftrow]['leftAccountText'] = $account['text'];
-							$rows[$leftrow]['leftValueRaw'] = (string)$booking['betrag'];
-							$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+							$rows[$leftrow]['leftValueRaw'] = $betrag;
+							$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($betrag);
 							$rows[$leftrow]['leftPoints'] = $this->plugin->toFloat($booking['punkte']);
 							$record['sumValuesLeft'] += $rows[$leftrow]['leftValueMoney'];
 							$record['sumPointsLeft'] += $rows[$leftrow]['leftPoints'];
@@ -434,11 +442,11 @@ class assAccountingQuestionPart
 							break;
 
 						case 'rechts':
-							$rows[$rightrow]['rightAccountRaw'] = (string)$booking['konto'];
+							$rows[$rightrow]['rightAccountRaw'] = $konto;
 							$rows[$rightrow]['rightAccountNum'] = $account['number'];
 							$rows[$rightrow]['rightAccountText'] = $account['text'];
-							$rows[$rightrow]['rightValueRaw'] = (string)$booking['betrag'];
-							$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+							$rows[$rightrow]['rightValueRaw'] = $betrag;
+							$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($betrag);
 							$rows[$rightrow]['rightPoints'] = $this->plugin->toFloat($booking['punkte']);
 							$record['sumValuesRight'] += $rows[$rightrow]['rightValueMoney'];
 							$record['sumPointsRight'] += $rows[$rightrow]['rightPoints'];
@@ -485,15 +493,22 @@ class assAccountingQuestionPart
 					$rightrow = 0;
 
 					foreach ($child->children() as $booking) {
-						$account = $this->parent->getAccount((string)$booking['konto']);
+
+                        $konto = (string)$booking['konto'];
+                        $betrag = (string) $booking['betrag'];
+                        if ($a_substitute_variables) {
+                            $konto = $this->parent->substituteVariables($konto);
+                            $betrag = $this->parent->substituteVariables($betrag);
+                        }
+                        $account = $this->parent->getAccount((string)$booking['konto']);
 
 						switch ($booking->getName()) {
 							case 'von':
-								$rows[$leftrow]['leftAccountRaw'] = (string)$booking['konto'];
+								$rows[$leftrow]['leftAccountRaw'] = $konto;
 								$rows[$leftrow]['leftAccountNum'] = $account['number'];
 								$rows[$leftrow]['leftAccountText'] = $account['text'];
-								$rows[$leftrow]['leftValueRaw'] = (string)$booking['betrag'];
-								$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+								$rows[$leftrow]['leftValueRaw'] = $betrag;
+								$rows[$leftrow]['leftValueMoney'] = $this->plugin->toFloat($betrag);
 								$rows[$leftrow]['leftPoints'] = $this->plugin->toFloat($booking['punkte']);
 								$record['sumValuesLeft'] += $rows[$leftrow]['leftValueMoney'];
 								$record['sumPointsLeft'] += $rows[$leftrow]['leftPoints'];
@@ -501,11 +516,11 @@ class assAccountingQuestionPart
 								break;
 
 							case 'an':
-								$rows[$rightrow]['rightAccountRaw'] = (string)$booking['konto'];
+								$rows[$rightrow]['rightAccountRaw'] = $konto;
 								$rows[$rightrow]['rightAccountNum'] = $account['number'];
 								$rows[$rightrow]['rightAccountText'] = $account['text'];
-								$rows[$rightrow]['rightValueRaw'] = (string)$booking['betrag'];
-								$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($booking['betrag']);
+								$rows[$rightrow]['rightValueRaw'] = $betrag;
+								$rows[$rightrow]['rightValueMoney'] = $this->plugin->toFloat($betrag);
 								$rows[$rightrow]['rightPoints'] = $this->plugin->toFloat($booking['punkte']);
 								$record['sumValuesRight'] += $rows[$rightrow]['rightValueMoney'];
 								$record['sumPointsRight'] += $rows[$rightrow]['rightPoints'];

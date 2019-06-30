@@ -172,4 +172,13 @@ abstract class ilAccqstVariable
     {
         return $this->plugin->toString($this->value);
     }
+
+    /**
+     * Get the value to be displayed
+     * Floats are converted to strings with the precision defined by the question
+     */
+    public function getDisplay()
+    {
+        return $this->plugin->toString($this->value, $this->question->getPrecision());
+    }
 }

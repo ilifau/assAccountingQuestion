@@ -8,13 +8,13 @@
  */
 class ilAccqstRangeVar extends ilAccqstVariable
 {
-    /** @var string minimum value */
+    /** @var float minimum value */
     public $min;
 
-    /** @var string maximum value */
+    /** @var float maximum value */
     public $max;
 
-    /** @var string step for creating values between min and max */
+    /** @var float step for creating values between min and max */
     public $step = 1;
 
 
@@ -30,11 +30,11 @@ class ilAccqstRangeVar extends ilAccqstVariable
             throw new ilException(sprintf($this->plugin->txt('missing_min_max'), $this->name));
         }
 
-        $this->min = (string) $element['min'];
-        $this->max = (string) $element['max'];
+        $this->min = $this->plugin->toFloat($element['min']);
+        $this->max = $this->plugin->toFloat($element['max']);
         if (!empty($element['step']))
         {
-            $this->step = (string) $element['step'];
+            $this->step = $this->plugin->toFloat($element['step']);
         }
     }
 
@@ -60,14 +60,10 @@ class ilAccqstRangeVar extends ilAccqstVariable
             return true;
         }
 
-        $min = $this->plugin->toFloat($this->min);
-        $max = $this->plugin->toFloat($this->max);
-        $step = $this->plugin->toFloat($this->step);
+       $maxsteps = (int) (($this->max - $this->min) / $this->step);
+       $num = rand(0, $maxsteps);
 
-        $maxsteps = (int) (($max - $min) / $step);
-        $num = rand(0, $maxsteps);
-
-       $this->value = (float) ( $min + $num * $step);
+       $this->value = (float) ( $this->min + $num * $this->step);
 
        return true;
     }
