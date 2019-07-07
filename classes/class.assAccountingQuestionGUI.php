@@ -605,7 +605,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$tpl->setVariable("CREDIT_AMOUNT", $w_data["record"]['rows'][$i]['rightValueRaw']);
 				$tpl->parseCurrentBlock();
 			}
-			$tpl->setCurrentBlock('question_part');
+
+            if ($this->plugin->isDebug()) {
+			    $part_debug = print_r($part_obj->getBookingData(), true);
+                $tpl->setVariable('PART_DEBUG', ilUtil::prepareFormOutput($part_debug));
+            }
+
+            $tpl->setCurrentBlock('question_part');
 			$tpl->parseCurrentBlock();
 		}
 

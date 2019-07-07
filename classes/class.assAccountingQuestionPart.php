@@ -426,7 +426,7 @@ class assAccountingQuestionPart
 				        $konto = $this->parent->substituteVariables($konto);
 				        $betrag = $this->parent->substituteVariables($betrag);
                     }
-					$account = $this->parent->getAccount((string)$booking['konto']);
+					$account = $this->parent->getAccount($konto);
 
 					switch ($booking->getName()) {
 						case 'links':
@@ -500,7 +500,7 @@ class assAccountingQuestionPart
                             $konto = $this->parent->substituteVariables($konto);
                             $betrag = $this->parent->substituteVariables($betrag);
                         }
-                        $account = $this->parent->getAccount((string)$booking['konto']);
+                        $account = $this->parent->getAccount($konto);
 
 						switch ($booking->getName()) {
 							case 'von':
