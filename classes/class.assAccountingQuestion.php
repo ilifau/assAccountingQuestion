@@ -656,7 +656,13 @@ class assAccountingQuestion extends assQuestion
 	{
 		try
 		{
-            $variables = ilAccqstVariable::getVariablesFromXmlCode($a_variables_xml, $this);
+		    if (trim($a_variables_xml) != '') {
+                $variables = ilAccqstVariable::getVariablesFromXmlCode($a_variables_xml, $this);
+            }
+            else {
+		        $variables = [];
+            }
+
 		}
 		catch (Exception $e)
 		{

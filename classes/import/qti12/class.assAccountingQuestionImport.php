@@ -12,7 +12,10 @@
 */
 class assAccountingQuestionImport extends assQuestionImport
 {
-	/**
+    /** @var assAccountingQuestion */
+    var $object;
+
+    /**
 	* Creates a question from a QTI file
 	*
 	* Receives parameters from a QTI parser and creates a valid ILIAS question object
@@ -107,6 +110,7 @@ class assAccountingQuestionImport extends assQuestionImport
 		$this->object->setObjId($questionpool_id);
 		$this->object->setEstimatedWorkingTime($duration["h"], $duration["m"], $duration["s"]);
 		$this->object->setAccountsXML(base64_decode($item->getMetadataEntry('accounts_content')));
+        $this->object->setVariablesXML(base64_decode($item->getMetadataEntry('variables_content')));
 		$this->object->setPoints($item->getMetadataEntry("points"));
 		// additional content editing mode information
 		$this->object->setAdditionalContentEditingMode(

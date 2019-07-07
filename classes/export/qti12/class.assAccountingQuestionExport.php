@@ -13,6 +13,9 @@
 */
 class assAccountingQuestionExport extends assQuestionExport
 {
+    /** @var assAccountingQuestion */
+    var $object;
+
 	/**
 	* Returns a QTI xml representation of the question
 	*
@@ -67,9 +70,15 @@ class assAccountingQuestionExport extends assQuestionExport
 		$a_xml_writer->xmlElement("fieldlabel", NULL, "accounts_content");
 		$a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getAccountsXML()));
 		$a_xml_writer->xmlEndTag("qtimetadatafield");
-		
-		
-		// save the question parts
+
+        // save the accounts definition
+        $a_xml_writer->xmlStartTag("qtimetadatafield");
+        $a_xml_writer->xmlElement("fieldlabel", NULL, "variables_content");
+        $a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getVariablesXML()));
+        $a_xml_writer->xmlEndTag("qtimetadatafield");
+
+
+        // save the question parts
 		$parts = array();
 
 		/** @var assAccountingQuestionPart $part_obj */

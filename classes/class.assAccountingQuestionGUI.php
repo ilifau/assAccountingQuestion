@@ -379,16 +379,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 			// get and check the variables XML
             $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
-            if (!empty($variables_xml))
-			{
-				if(!$this->object->setVariablesXML($variables_xml))
-                {
-                    $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
-                }
-                elseif (!$this->object->calculateVariables())
-                {
-                    $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
-                }
+            if(!$this->object->setVariablesXML($variables_xml))
+            {
+                $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
+            }
+            elseif (!$this->object->calculateVariables())
+            {
+                $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
             }
 
             $this->object->setPrecision($_POST['precision']);
