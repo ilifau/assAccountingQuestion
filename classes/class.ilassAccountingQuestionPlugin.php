@@ -34,7 +34,7 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
      */
     public function isDebug()
     {
-        return true;
+        return false;
     }
 
 
