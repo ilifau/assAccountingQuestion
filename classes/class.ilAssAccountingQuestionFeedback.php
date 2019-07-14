@@ -16,5 +16,27 @@
 
 class ilAssAccountingQuestionFeedback extends ilAssSingleOptionQuestionFeedback
 {
-    
+
+    /**
+     * object instance of current question
+     * @var assAccountingQuestion
+     */
+    protected $questionOBJ = null;
+
+
+    /**
+     * returns the html of GENERIC feedback for the given question id for test presentation
+     * (either for the complete solution or for the incomplete solution)
+     *
+     * @access public
+     * @param integer $questionId
+     * @param boolean $solutionCompleted
+     * @return string $genericFeedbackTestPresentationHTML
+     */
+    public function getGenericFeedbackTestPresentation($questionId, $solutionCompleted)
+    {
+        $html = parent::getGenericFeedbackTestPresentation($questionId, $solutionCompleted);
+        return $this->questionOBJ->substituteVariables($html);
+    }
+
 }
