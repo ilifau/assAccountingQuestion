@@ -36,7 +36,7 @@ class ilAssAccountingQuestionFeedback extends ilAssSingleOptionQuestionFeedback
     public function getGenericFeedbackTestPresentation($questionId, $solutionCompleted)
     {
         $html = parent::getGenericFeedbackTestPresentation($questionId, $solutionCompleted);
-        return $this->questionOBJ->substituteVariables($html);
+        return $this->questionOBJ->substituteVariables($html, assAccountingQuestion::SUB_DISPLAY);
     }
 
 }

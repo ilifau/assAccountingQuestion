@@ -32,7 +32,12 @@ class ilAccqstSwitchVar extends ilAccqstVariable
             $case = [];
             switch ($child->getName()) {
                 case 'case':
-                    if (!empty($child['value'])) {
+                    if (!empty($child['text'])) {
+                        $case['type'] = 'text';
+                        $case['test'] = (string) $child['text'];
+                        $case['return'] = trim((string) $child);
+                    }
+                    elseif (!empty($child['value'])) {
                         $case['type'] = 'value';
                         $case['test'] = (string) $child['value'];
                         $case['return'] = trim((string) $child);
@@ -96,27 +101,33 @@ class ilAccqstSwitchVar extends ilAccqstVariable
             return true;
         }
 
-        $this->check = $this->plugin->toFloat($this->question->substituteVariables($this->check));
+        $this->check = $this->question->substituteVariables($this->check);
 
         foreach ($this->cases as $index => $case) {
 
-            $this->cases[$index]['test'] = $this->plugin->toFloat($this->question->substituteVariables($case['test']));
+            $this->cases[$index]['test'] = $this->question->substituteVariables($case['test']);
             $this->cases[$index]['return'] = $this->question->substituteVariables($case['return']);
         }
 
         foreach ($this->cases as $case) {
             switch ($case['type']) {
 
-                case 'value':
-                    if ($this->question->equals($this->check, $case['test'])) {
+                case 'text':
+                    if ($this->plugin->toString($this->check) ==  $this->plugin->toString($case['test'])) {
                         $this->value = $case['return'];
                         return true;
                     }
                     break;
 
+                case 'value':
+                    if ($this->question->equals($this->plugin->toFloat($this->check), $this->plugin->toFloat($case['test']))) {
+                        $this->value = $case['return'];
+                        return true;
+                    }
+                    break;
 
                 case 'max':
-                    if ($this->check <= $case['test']) {
+                    if ($this->plugin->toFloat($this->check) <= $this->plugin->toFloat($case['test'])) {
                         $this->value = $case['return'];
                         return true;
                     }

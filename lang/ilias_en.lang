@@ -67,7 +67,7 @@ unknown_variable_type#:#The variable with name '%s' has an unknown type.
 missing_min_max#:#The variable '%s' has no 'min' oder 'max' attribute.
 select_child_not_val#:The variable '%s' may only have 'val' elements as childs.
 missing_check#:#The variable '%s' has no 'check' attribute.
-missing_case_value_or_max#:#The variable '%s' has a case without 'value' or 'max attribute'.
+missing_case_value_or_max#:#The variable '%s' has a case without 'text', 'value' or 'max' attribute.
 unknown_child#:#The variable '%s' has an unknown child element.
 missing_content#:#The variable '%s' has no content.
 exceeded_calculation_depth#:#The variable '%s' exceeded the maximum calculation depth.

@@ -528,7 +528,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$this->tpl->addCss(self::URL_PATH.'/js/combobox/css/bootstrap-combobox.css'.self::URL_SUFFIX);
 		$this->tpl->addJavascript(self::URL_PATH.'/js/combobox/js/bootstrap-combobox.js');
 		$this->tpl->addJavascript(self::URL_PATH.'/js/ilAccountingQuestion.js');
-		$this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:false});');
+
+		if ($this->object->getAccountsSearchTitle()) {
+            $this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:true});');
+        }
+		else {
+            $this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:false});');
+        }
 
 		// get the question output template
 		$tpl = $this->plugin->getTemplate("tpl.il_as_qpl_accqst_output.html");
@@ -959,8 +965,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$tpl->setCurrentBlock('booking_row');
 				$tpl->setVariable('LEFT_ACCOUNT', (string)$row['leftAccountText']);
 				$tpl->setVariable('RIGHT_ACCOUNT', (string)$row['rightAccountText']);
-				$tpl->setVariable('LEFT_VALUE', (string)$row['leftValueRaw']);
-				$tpl->setVariable('RIGHT_VALUE', (string)$row['rightValueRaw']);
+				$tpl->setVariable('LEFT_VALUE', $this->plugin->toString($row['leftValueMoney'], $this->object->getPrecision()));
+				$tpl->setVariable('RIGHT_VALUE', $this->plugin->toString($row['rightValueMoney'], $this->object->getPrecision()));
 				if ($a_show_points)
 				{
 					$tpl->setVariable('LEFT_POINTS', (string)$row['leftPoints']);
@@ -980,8 +986,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// sum row of the record
 		$tpl->setCurrentBlock('sum_row');
 		$tpl->setVariable('TXT_SUM', $this->plugin->txt('label_sum') . ': ');
-		$tpl->setVariable('SUM_VALUES_LEFT', (string)$record['sumValuesLeft']);
-		$tpl->setVariable('SUM_VALUES_RIGHT', (string)$record['sumValuesRight']);
+		$tpl->setVariable('SUM_VALUES_LEFT',  $this->plugin->toString($record['sumValuesLeft'], $this->object->getPrecision()));
+		$tpl->setVariable('SUM_VALUES_RIGHT', $this->plugin->toString($record['sumValuesRight'], $this->object->getPrecision()));
 		if ($a_show_points)
 		{
 			$tpl->setVariable('SUM_POINTS_LEFT', (string)$record['sumPointsLeft']);

@@ -80,13 +80,14 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
             }
             else {
                 if (is_float($value) && is_int($precision)) {
-                    $string = sprintf('%.'.$precision.'f', $value);
+                    $string = number_format($value, $precision, ',', '.');
                 }
                 else {
                     $string = strval($value);
+                    $string = str_replace('.', ',', $string);
                 }
                 $string = str_replace(' ', '', $string);
-                $string = str_replace('.', ',', $string);
+
                 return $string;
             }
         }

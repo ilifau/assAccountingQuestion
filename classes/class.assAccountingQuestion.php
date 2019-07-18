@@ -50,7 +50,15 @@ class assAccountingQuestion extends assQuestion
 	 * Is set by setAccountsXML()
 	 * @var string
 	 */
-	private $accounts_display = 'both'; // 'number', 'title', 'both'
+	private $accounts_display = 'beide'; // 'nummer', 'titel', 'beide'
+
+
+    /**
+     * Search for title in the dropdowns
+     * Is set by setAccountsXML()
+     * @var bool
+     */
+    private $accounts_search_title = false;
 
 
     /**
@@ -553,6 +561,7 @@ class assAccountingQuestion extends assQuestion
 		}
 
 		$display = (string) $xml['anzeige'];
+        $search = (string) $xml['suche'];
 
 		// init accounts data (not yed saved in db)
 		$data[] = array();
@@ -586,6 +595,8 @@ class assAccountingQuestion extends assQuestion
         $this->accounts_xml = $a_accounts_xml;
         $this->accounts_data = $data;
         $this->accounts_display = $display;
+        $this->accounts_search_title = ($search == 'beide' || $search == 'titel');
+
 		return true;
 	}
 
@@ -646,6 +657,15 @@ class assAccountingQuestion extends assQuestion
 		return $this->accounts_xml;
 	}
 
+
+    /**
+     * get if search for account titles is allowed
+     * @return bool
+     */
+	public function getAccountsSearchTitle()
+    {
+        return $this->accounts_search_title;
+    }
 
     /**
 	 * set the variables definitions from XML
