@@ -4,18 +4,18 @@
  * GPLv2, see LICENSE 
  */
 
-include_once "./Modules/TestQuestionPool/classes/import/qti12/class.assQuestionImport.php";
-
 /**
 * Class for accounting question import
 *
 * @author	Fred Neumann <fred.neumann@fim.unierlangen.de>
-* @version	$Id: $
 * @ingroup 	ModulesTestQuestionPool
 */
 class assAccountingQuestionImport extends assQuestionImport
 {
-	/**
+    /** @var assAccountingQuestion */
+    var $object;
+
+    /**
 	* Creates a question from a QTI file
 	*
 	* Receives parameters from a QTI parser and creates a valid ILIAS question object
@@ -30,7 +30,10 @@ class assAccountingQuestionImport extends assQuestionImport
 	*/
 	function fromXML(&$item, $questionpool_id, &$tst_id, &$tst_object, &$question_counter, &$import_mapping)
 	{
-		global $ilUser, $ilLog;
+		global $DIC;
+
+		$ilUser = $DIC->user();
+		$ilLog = $DIC->logger()->root();
 
 		// empty session variable for imported xhtml mobs
 		unset($_SESSION["import_mob_xhtml"]);
@@ -107,6 +110,7 @@ class assAccountingQuestionImport extends assQuestionImport
 		$this->object->setObjId($questionpool_id);
 		$this->object->setEstimatedWorkingTime($duration["h"], $duration["m"], $duration["s"]);
 		$this->object->setAccountsXML(base64_decode($item->getMetadataEntry('accounts_content')));
+        $this->object->setVariablesXML(base64_decode($item->getMetadataEntry('variables_content')));
 		$this->object->setPoints($item->getMetadataEntry("points"));
 		// additional content editing mode information
 		$this->object->setAdditionalContentEditingMode(
@@ -133,6 +137,7 @@ class assAccountingQuestionImport extends assQuestionImport
 				}
 
 				// create and add a new part
+				/** @var assAccountingQuestionPart $part_obj */
 				$part_obj = $this->object->getPart();
 				$part_obj->setPosition($part['position']);
 				$part_obj->setText($part['text']);
@@ -155,8 +160,6 @@ class assAccountingQuestionImport extends assQuestionImport
 		$questiontext = $this->object->getQuestion();
 		if (is_array($_SESSION["import_mob_xhtml"]))
 		{
-			include_once "./Services/MediaObjects/classes/class.ilObjMediaObject.php";
-			include_once "./Services/RTE/classes/class.ilRTE.php";
 			foreach ($_SESSION["import_mob_xhtml"] as $mob)
 			{
 				if ($tst_id > 0)
@@ -167,7 +170,6 @@ class assAccountingQuestionImport extends assQuestionImport
 				{
 					$importfile = $this->getQplImportArchivDirectory() . '/' . $mob["uri"];
 				}
-				global $ilLog;
 				$ilLog->write($importfile);
 
 				$media_object =& ilObjMediaObject::_saveTempFileAsMediaObject(basename($importfile), $importfile, FALSE);

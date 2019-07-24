@@ -4,8 +4,6 @@
  * GPLv2, see LICENSE 
  */
 
-include_once "./Modules/TestQuestionPool/classes/export/qti12/class.assQuestionExport.php";
-
 /**
 * Class for accounting question export
 *
@@ -15,6 +13,9 @@ include_once "./Modules/TestQuestionPool/classes/export/qti12/class.assQuestionE
 */
 class assAccountingQuestionExport extends assQuestionExport
 {
+    /** @var assAccountingQuestion */
+    var $object;
+
 	/**
 	* Returns a QTI xml representation of the question
 	*
@@ -26,9 +27,8 @@ class assAccountingQuestionExport extends assQuestionExport
 	*/
 	function toXML($a_include_header = true, $a_include_binary = true, $a_shuffle = false, $test_output = false, $force_image_references = false)
 	{
-		global $ilias;
+	    global $DIC;
 		
-		include_once("./Services/Xml/classes/class.ilXmlWriter.php");
 		$a_xml_writer = new ilXmlWriter;
 		// set xml header
 		$a_xml_writer->xmlHeader();
@@ -50,7 +50,7 @@ class assAccountingQuestionExport extends assQuestionExport
 		$a_xml_writer->xmlStartTag("qtimetadata");
 		$a_xml_writer->xmlStartTag("qtimetadatafield");
 		$a_xml_writer->xmlElement("fieldlabel", NULL, "ILIAS_VERSION");
-		$a_xml_writer->xmlElement("fieldentry", NULL, $ilias->getSetting("ilias_version"));
+		$a_xml_writer->xmlElement("fieldentry", NULL, $DIC->settings()->get("ilias_version"));
 		$a_xml_writer->xmlEndTag("qtimetadatafield");
 		$a_xml_writer->xmlStartTag("qtimetadatafield");
 		$a_xml_writer->xmlElement("fieldlabel", NULL, "QUESTIONTYPE");
@@ -70,11 +70,19 @@ class assAccountingQuestionExport extends assQuestionExport
 		$a_xml_writer->xmlElement("fieldlabel", NULL, "accounts_content");
 		$a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getAccountsXML()));
 		$a_xml_writer->xmlEndTag("qtimetadatafield");
-		
-		
-		// save the question parts
+
+        // save the accounts definition
+        $a_xml_writer->xmlStartTag("qtimetadatafield");
+        $a_xml_writer->xmlElement("fieldlabel", NULL, "variables_content");
+        $a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getVariablesXML()));
+        $a_xml_writer->xmlEndTag("qtimetadatafield");
+
+
+        // save the question parts
 		$parts = array();
-		foreach($this->object->getParts() as $part_obj)
+
+		/** @var assAccountingQuestionPart $part_obj */
+        foreach($this->object->getParts() as $part_obj)
 		{
 			$part = array(
                 "part_id" => $part_obj->getPartId(),
@@ -177,5 +185,3 @@ class assAccountingQuestionExport extends assQuestionExport
 	}
 
 }
-
-?>

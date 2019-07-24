@@ -57,3 +57,22 @@ download_booking_xml#:#Upload the booking definition
 grading_details_note#:#Note: The grading details are shown because you have write permission.
 feedback_correct_solution#:#Correct solution
 feedback_user_solution#:#User solution
+variables_xml#:#Variables XML Definition
+variables_xml_info#:#Variables let you vary the texts and values in the question.
+xml_variables_error#:#The variables definition has errors!
+missing_element_variables#:#The 'variables' element is missing.
+missing_var_or_name#:#The elements in 'variables' must be 'var' and have a 'name' attribute.
+double_variable_definition#:#The variable with name '%s' is defined twice.
+unknown_variable_type#:#The variable with name '%s' has an unknown type.
+missing_min_max#:#The variable '%s' has no 'min' oder 'max' attribute.
+select_child_not_val#:The variable '%s' may only have 'val' elements as childs.
+missing_check#:#The variable '%s' has no 'check' attribute.
+missing_case_value_or_max#:#The variable '%s' has a case without 'text', 'value' or 'max' attribute.
+unknown_child#:#The variable '%s' has an unknown child element.
+missing_content#:#The variable '%s' has no content.
+exceeded_calculation_depth#:#The variable '%s' exceeded the maximum calculation depth.
+forbidden_self_reference#:#The variable '%s' must not refer to itself.
+unknown_variable_reference#:#The variable '%s' refers an undefined variable '%s'.
+var_not_calculated#:#The variable '%s' couldn't be calculated.
+precision#:#Precision
+precision_info#:#Decimal places which are checked when values are compared. 1 place requires a smaller difference than 0,1 sein, 2 places require a difference below 0,01.
