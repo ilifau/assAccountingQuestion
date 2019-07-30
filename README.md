@@ -31,6 +31,10 @@ Version History
 * Version 1.7.0 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5.0 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.7.2 (2019-07-30)
+--------------------------
+* Support for Variables (see docs/Manual-English.pdf)
+
 Version 1.7.0 (2018-09-17)
 --------------------------
 * Updated for ILIAS 5.3
