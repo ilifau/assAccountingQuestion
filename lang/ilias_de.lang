@@ -75,4 +75,6 @@ forbidden_self_reference#:#Die Variable "%s" darf sich nicht selbst referenziere
 unknown_variable_reference#:#Die Variable "%s" verwendet eine nicht definierte Variable "%s".
 var_not_calculated#:#Die Variable "%" konnte nicht berechnet werden.
 precision#:#Genauigkeit
-precision_info#:#Nachkommastellen, auf die bei Vergleichen zweier Werte geprüft wird. Bei 1 muss die Differenz kleiner 0,1 sein, bei 2 kleiner als 0,01.
+precision_info#:#Nachkommastellen, auf die Variablen vor Berechnungen gerundet werden und auf die bei Vergleichen zweier Werte geprüft wird. Bei 1 muss die Differenz kleiner 0,1 sein, bei 2 kleiner als 0,01.
+variables_file#:#Variablen-Definition hochladen
+download_variables_xml#:#Variablen-Definition herunterladen

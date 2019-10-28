@@ -32,6 +32,12 @@ Version History
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.8.3 (2019-10-28)
+--------------------------
+* Use precision also for calculated variables (substituted variables are reounded before)
+* Suppress display of zeros in empty solution lines
+* Upload and download of variables XML
+
 Version 1.8.2 (2019-07-25)
 --------------------------
 * Support for Variables (see docs/Manual-English.pdf)
