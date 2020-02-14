@@ -96,20 +96,6 @@ input.ilAccqstAmount {
     min-width: 4em;
 }
 
-/*Set Size of the container table*/
-table.container_table{
-    width: 100%;
-}
-td.container_table_left{
-    width: 45%;
-}
-td.container_table_middle{
-    width: 10%;
-}
-td.container_table_right{
-    width: 45%;
-}
-
 /*Set padding for the rows and columns in each table*/
 table.table_left td {
     padding: 0.5em;
