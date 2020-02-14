@@ -45,12 +45,12 @@ tr.accqstBookingTableScoring td {
 .accqstAccount, .accqstLeft {text-align: left; }
 .accqstValue, .accqstRight { text-align: right; }
 .accqstPoints { text-align: right; font-style:italic;}
-.accqstCenter { text-align: center; } 
+.accqstCenter { text-align: center; font-weight: bold;}
 .accqstRecordScoring { text-align: left; font-style:italic;}
 	
 
 .accqstInput {
-	witdh: 100%;
+	width: 100%;
 	background-color:white;
 	border-style:inset;
 	border-width:1px;
@@ -78,4 +78,43 @@ p.accqstPartIntro {
 
 p.accqstPartScore {
 	font-style: italic;
+}
+
+/*Set container overflow-x to auto (scroll if needed)*/
+.aqqst_container {
+	width: 80%;
+    overflow-x: visible;
+	overflow-y: visible;
+}
+
+/*Set min-width to the inputs*/
+input.ilAccqstAccount {
+    min-width: 9em;
+}
+
+input.ilAccqstAmount {
+    min-width: 4em;
+}
+
+/*Set Size of the container table*/
+table.container_table{
+    width: 100%;
+}
+td.container_table_left{
+    width: 45%;
+}
+td.container_table_middle{
+    width: 10%;
+}
+td.container_table_right{
+    width: 45%;
+}
+
+/*Set padding for the rows and columns in each table*/
+table.table_left td {
+    padding: 0.5em;
+}
+
+table.table_right td {
+    padding: 0.5em;
 }

@@ -576,46 +576,54 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 			$num_rows = $part_obj->getBookingData('showLines');
 
+			//LEFT
 			for ($i = 0; $i < $num_rows; $i++)
 			{
-				$tpl->setCurrentBlock('accounting');
+				$tpl->setCurrentBlock('accounting_left');
 				$tpl->setVariable("QUESTION_ID", $this->object->getId());
 				$tpl->setVariable("QUESTION_PART", $part_id);
 				$tpl->setVariable("ROW", $i);
-				$tpl->setVariable("SELECTED_ACCOUNT_LEFT_VALUE", $w_data["record"]['rows'][$i]['leftAccountNum']);
+                foreach ($accounts as $account)
+                {
+                    $tpl->setCurrentBlock('accounts_left');
+                    $tpl->setVariable("ACCOUNT_VALUE", $account['number']);
+                    $tpl->setVariable("ACCOUNT_TEXT", $account['text']);
+                    $tpl->parseCurrentBlock();
+                }
+                $tpl->setCurrentBlock('accounting_left');
+                $tpl->setVariable("SELECTED_ACCOUNT_LEFT_VALUE", $w_data["record"]['rows'][$i]['leftAccountNum']);
 				$tpl->setVariable("SELECTED_LEFT_ACCOUNT", $w_data["record"]['rows'][$i]['leftAccountRaw']);
-
-				foreach ($accounts as $account)
-				{
-					$tpl->setCurrentBlock('accounts_left');
-					$tpl->setVariable("ACCOUNT_VALUE", $account['number']);
-					$tpl->setVariable("ACCOUNT_TEXT", $account['text']);
-					$tpl->parseCurrentBlock();
-				}
-				$tpl->setCurrentBlock('accounting');
-				$tpl->setVariable("DEBIT_AMOUNT", $w_data["record"]['rows'][$i]['leftValueRaw']);
-				$tpl->setVariable("TO_COLUMN", " ");
-				$tpl->setVariable("SELECTED_ACCOUNT_RIGHT_VALUE", $w_data["record"]['rows'][$i]['rightAccountNum']);
-				$tpl->setVariable("SELECTED_RIGHT_ACCOUNT", $w_data["record"]['rows'][$i]['rightAccountRaw']);
-				foreach ($accounts as $account)
-				{
-					$tpl->setCurrentBlock('accounts_right');
-					$tpl->setVariable("ACCOUNT_VALUE", $account['number']);
-					$tpl->setVariable("ACCOUNT_TEXT", $account['text']);
-					$tpl->parseCurrentBlock();
-				}
-				$tpl->setCurrentBlock('accounting');
-				$tpl->setVariable("CREDIT_AMOUNT", $w_data["record"]['rows'][$i]['rightValueRaw']);
-				$tpl->parseCurrentBlock();
+                $tpl->setVariable("DEBIT_AMOUNT", $w_data["record"]['rows'][$i]['leftValueRaw']);
+                $tpl->parseCurrentBlock();
 			}
 
-            if ($this->plugin->isDebug()) {
-			    $part_debug = print_r($part_obj->getBookingData(), true);
-                $tpl->setVariable('PART_DEBUG', ilUtil::prepareFormOutput($part_debug));
+            for ($i = 0; $i < $num_rows; $i++)
+            {
+                $tpl->setCurrentBlock('accounting_right');
+                $tpl->setVariable("QUESTION_ID", $this->object->getId());
+                $tpl->setVariable("QUESTION_PART", $part_id);
+                $tpl->setVariable("ROW", $i);
+                foreach ($accounts as $account)
+                {
+                    $tpl->setCurrentBlock('accounts_right');
+                    $tpl->setVariable("ACCOUNT_VALUE", $account['number']);
+                    $tpl->setVariable("ACCOUNT_TEXT", $account['text']);
+                    $tpl->parseCurrentBlock();
+                }
+                $tpl->setCurrentBlock('accounting_right');
+                $tpl->setVariable("SELECTED_ACCOUNT_RIGHT_VALUE", $w_data["record"]['rows'][$i]['rightAccountNum']);
+                $tpl->setVariable("SELECTED_RIGHT_ACCOUNT", $w_data["record"]['rows'][$i]['rightAccountRaw']);
+                $tpl->setVariable("CREDIT_AMOUNT", $w_data["record"]['rows'][$i]['rightValueRaw']);
+                $tpl->parseCurrentBlock();
             }
 
             $tpl->setCurrentBlock('question_part');
 			$tpl->parseCurrentBlock();
+
+            if ($this->plugin->isDebug()) {
+                $part_debug = print_r($part_obj->getBookingData(), true);
+                $tpl->setVariable('PART_DEBUG', ilUtil::prepareFormOutput($part_debug));
+            }
 		}
 
 		return $tpl->get();

@@ -32,6 +32,10 @@ Version History
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.8.3 (2020-02-14)
+--------------------------
+* Usability changes regarding using TAB key to fill in first the left column, and after the right column, and improvements in how the question is presented to the user if using a Tablet or a Mobile device.
+
 Version 1.8.2 (2019-07-25)
 --------------------------
 * Support for Variables (see docs/Manual-English.pdf)
