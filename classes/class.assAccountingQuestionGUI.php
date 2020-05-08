@@ -43,6 +43,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	public function __construct($id = -1)
 	{
+	    global $DIC;
 		parent::__construct();
 		$this->plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, "TestQuestionPool", "qst", "assAccountingQuestion");
 		$this->plugin->includeClass("class.assAccountingQuestion.php");
@@ -51,7 +52,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		if ($id >= 0) {
 			$this->object->loadFromDb($id);
 		}
-		$this->tpl->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css').self::URL_SUFFIX, '');
+        $DIC->globalScreen()->layout()->meta()->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css'.self::URL_SUFFIX, ''));
 	}
 
 
@@ -389,6 +390,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
             }
 
             $this->object->setPrecision($_POST['precision']);
+            $this->object->setLifecycle(ilAssQuestionLifecycle::getInstance($_POST['lifecycle']));
 
 			// sort the part positions
 			$positions = array();
@@ -525,15 +527,16 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		// init the javascript support for answer input
 		// NOTE: the own URL suffix does not work with addJavascript
-		$this->tpl->addCss(self::URL_PATH.'/js/combobox/css/bootstrap-combobox.css'.self::URL_SUFFIX);
-		$this->tpl->addJavascript(self::URL_PATH.'/js/combobox/js/bootstrap-combobox.js');
-		$this->tpl->addJavascript(self::URL_PATH.'/js/ilAccountingQuestion.js');
+        global $DIC;
+        $DIC->globalScreen()->layout()->meta()->addCss(self::URL_PATH.'/js/combobox/css/bootstrap-combobox.css'.self::URL_SUFFIX);
+        $DIC->globalScreen()->layout()->meta()->addJs(self::URL_PATH.'/js/combobox/js/bootstrap-combobox.js');
+        $DIC->globalScreen()->layout()->meta()->addJs(self::URL_PATH.'/js/ilAccountingQuestion.js');
 
 		if ($this->object->getAccountsSearchTitle()) {
-            $this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:true});');
+            $DIC->globalScreen()->layout()->meta()->addOnLoadCode('il.AccountingQuestion.init({nameMatching:true});');
         }
 		else {
-            $this->tpl->addOnLoadCode('il.AccountingQuestion.init({nameMatching:false});');
+            $DIC->globalScreen()->layout()->meta()->addOnLoadCode('il.AccountingQuestion.init({nameMatching:false});');
         }
 
 		// get the question output template

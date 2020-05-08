@@ -235,6 +235,7 @@ class assAccountingQuestion extends assQuestion
 		$this->setAuthor($data["author"]);
 		$this->setOwner($data["owner"]);
 		$this->setPoints($data["points"]);
+		$this->setLifecycle(ilAssQuestionLifecycle::getInstance($data['lifecycle']));
 
 		$this->setQuestion(ilRTE::_replaceMediaObjectImageSrc($data["question_text"], 1));
 		$this->setEstimatedWorkingTime(substr($data["working_time"], 0, 2), substr($data["working_time"], 3, 2), substr($data["working_time"], 6, 2));
