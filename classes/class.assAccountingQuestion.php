@@ -810,7 +810,7 @@ class assAccountingQuestion extends assQuestion
             if (strpos($string, $pattern) !== false) {
                 switch ($mode) {
                     case self::SUB_NUMERIC:
-                        $value = (string) $var->getFloat();
+                        $value = $var->getNumeric();
                         break;
                     case self::SUB_DISPLAY:
                         $value = $var->getDisplay();
