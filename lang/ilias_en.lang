@@ -75,4 +75,6 @@ forbidden_self_reference#:#The variable '%s' must not refer to itself.
 unknown_variable_reference#:#The variable '%s' refers an undefined variable '%s'.
 var_not_calculated#:#The variable '%s' couldn't be calculated.
 precision#:#Precision
-precision_info#:#Decimal places which are checked when values are compared. 1 place requires a smaller difference than 0,1 sein, 2 places require a difference below 0,01.
+precision_info#:#Decimal places at which variables are rounded before calculations and which are checked when values are compared. 1 place requires a smaller difference than 0,1 sein, 2 places require a difference below 0,01.
+variables_file#:#Upload a variables definition
+download_variables_xml#:#Download the variables definition
