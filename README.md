@@ -46,6 +46,16 @@ Version 1.8.0 (2019-06-09)
 --------------------------
 * Updated for ILAS 5.4
 
+Version 1.7.3 (2019-10-28)
+--------------------------
+* Use precision also for calculated variables (substituted variables are reounded before)
+* Suppress display of zeros in empty solution lines
+* Upload and download of variables XML
+
+Version 1.7.2 (2019-07-30)
+--------------------------
+* Support for Variables (see docs/Manual-English.pdf)
+
 Version 1.7.0 (2018-09-17)
 --------------------------
 * Updated for ILIAS 5.3
