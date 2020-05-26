@@ -32,6 +32,10 @@ Version History
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.8.5 (2020-05-27)
+--------------------------
+* Definition of thousands delimiter fpr the presentation of centered and calculated values
+
 Version 1.8.4 (2020-05-21)
 --------------------------
 * Usability changes regarding using TAB key to fill in first the left column, and after the right column, and improvements in how the question is presented to the user if using a Tablet or a Mobile device.
