@@ -28,6 +28,20 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
         return $this->txt($this->getQuestionType());
     }
 
+
+    /**
+     * Get the global configuration
+     * @return assAccountingQuestionConfig
+     */
+    public function getConfig()
+    {
+        if (!isset($this->config)) {
+            $this->includeClass('class.assAccountingQuestionConfig.php');
+            $this->config = new assAccountingQuestionConfig($this);
+        }
+        return $this->config;
+    }
+
     /**
      * Define if debugging outputs should be shown
      * @return bool
@@ -79,14 +93,14 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
                 return $value;
             }
             else {
-                if (is_float($value) && is_int($precision)) {
-                    $string = number_format($value, $precision, ',', '.');
+                if ((is_int($value) || is_float($value)) && is_int($precision)) {
+                    $string = number_format($value, $precision, ',', $this->getConfig()->getThousandsDelim());
                 }
                 else {
                     $string = strval($value);
                     $string = str_replace('.', ',', $string);
+                    $string = str_replace(' ', '', $string);
                 }
-                $string = str_replace(' ', '', $string);
 
                 return $string;
             }

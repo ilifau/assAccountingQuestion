@@ -78,3 +78,10 @@ precision#:#Precision
 precision_info#:#Decimal places at which variables are rounded before calculations and which are checked when values are compared. 1 place requires a smaller difference than 0,1 sein, 2 places require a difference below 0,01.
 variables_file#:#Upload a variables definition
 download_variables_xml#:#Download the variables definition
+settings_saved#:#Settings saved.
+plugin_configuration#:#Plugin Configuration
+thousands_delim_type#:#Thousands Delimiter
+thousands_delim_type_info#:#This delimiter is used to separate blocks of thousands when user inputs and calculated values are presented in results. Pre-defined values are presented as defined without reformattting.
+delim_none#:#No Delimiter
+delim_dot#:#Dot
+delim_space#:#Space
