@@ -112,6 +112,10 @@ class assAccountingQuestionImport extends assQuestionImport
 		$this->object->setAccountsXML(base64_decode($item->getMetadataEntry('accounts_content')));
         $this->object->setVariablesXML(base64_decode($item->getMetadataEntry('variables_content')));
 		$this->object->setPoints($item->getMetadataEntry("points"));
+		$this->object->setPrecision((int) $item->getMetadataEntry('precision'));
+		$this->object->setThousandsDelimType($item->getMetadataEntry('thousands_delim_type'));
+
+
 		// additional content editing mode information
 		$this->object->setAdditionalContentEditingMode(
 			$this->fetchAdditionalContentEditingModeInformation($item)

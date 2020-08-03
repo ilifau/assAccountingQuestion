@@ -84,9 +84,10 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
      * Get a value as string (decimals are separated by ,)
      * @param mixed $value
      * @param int   $precision for showing numbers
+     * @param string  $thousands_delim  for showing numbers
      * @return string
      */
-    public function toString($value = null,  $precision = null)
+    public function toString($value = null,  $precision = null, $thousands_delim = '')
     {
         try {
             if (is_string($value)) {
@@ -94,7 +95,7 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
             }
             else {
                 if ((is_int($value) || is_float($value)) && is_int($precision)) {
-                    $string = number_format($value, $precision, ',', $this->getConfig()->getThousandsDelim());
+                    $string = number_format($value, $precision, ',', $thousands_delim);
                 }
                 else {
                     $string = strval($value);

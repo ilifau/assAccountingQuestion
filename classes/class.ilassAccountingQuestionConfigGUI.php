@@ -90,6 +90,7 @@ class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
         }
 
         $this->config->thousands_delim_type = $form->getInput('thousands_delim_type');
+        $this->config->thousands_delim_per_question = (bool) $form->getInput('thousands_delim_per_question');
         $this->config->save();
 
         ilUtil::sendSuccess($this->plugin->txt('settings_saved'), true);
@@ -115,6 +116,12 @@ class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
         ));
         $td->setValue($this->config->thousands_delim_type);
         $form->addItem($td);
+
+        $pq = new ilCheckboxInputGUI($this->plugin->txt('thousands_delim_per_question'), 'thousands_delim_per_question');
+        $pq->setInfo($this->plugin->txt('thousands_delim_per_question_info'));
+        $pq->setChecked($this->config->thousands_delim_per_question);
+        $form->addItem($pq);
+
 
         $form->addCommandButton('saveConfiguration', $this->lng->txt('save'));
         return $form;

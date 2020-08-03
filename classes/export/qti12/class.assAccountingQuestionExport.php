@@ -71,10 +71,20 @@ class assAccountingQuestionExport extends assQuestionExport
 		$a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getAccountsXML()));
 		$a_xml_writer->xmlEndTag("qtimetadatafield");
 
-        // save the accounts definition
+        // save the variables definition
         $a_xml_writer->xmlStartTag("qtimetadatafield");
         $a_xml_writer->xmlElement("fieldlabel", NULL, "variables_content");
         $a_xml_writer->xmlElement("fieldentry", NULL, base64_encode($this->object->getVariablesXML()));
+        $a_xml_writer->xmlEndTag("qtimetadatafield");
+
+        $a_xml_writer->xmlStartTag("qtimetadatafield");
+        $a_xml_writer->xmlElement("fieldlabel", NULL, "precision");
+        $a_xml_writer->xmlElement("fieldentry", NULL, $this->object->getPrecision());
+        $a_xml_writer->xmlEndTag("qtimetadatafield");
+
+        $a_xml_writer->xmlStartTag("qtimetadatafield");
+        $a_xml_writer->xmlElement("fieldlabel", NULL, "thousands_delim_type");
+        $a_xml_writer->xmlElement("fieldentry", NULL, $this->object->getThousandsDelimType());
         $a_xml_writer->xmlEndTag("qtimetadatafield");
 
 

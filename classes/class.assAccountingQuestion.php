@@ -21,7 +21,7 @@ class assAccountingQuestion extends assQuestion
 
 	/**
 	 * Reference of the plugin object
-	 * @var object
+	 * @var ilassAccountingQuestionPlugin
 	 */
 	private $plugin;
 
@@ -86,6 +86,12 @@ class assAccountingQuestion extends assQuestion
      * @var int
      */
 	private $precision = 2;
+
+    /**
+     * Thousands delimiter set by the question
+     * @var null
+     */
+	private $thousands_delim_type = '';
 
 	/**
 	 * ilAccountingQuestion constructor
@@ -196,7 +202,8 @@ class assAccountingQuestion extends assQuestion
 				'question_fi' => array('integer', $ilDB->quote($this->getId(), 'integer')),
 				'account_hash' => array('text', $hash),
 				'variables_def' => array('clob', $this->getVariablesXML()),
-                'prec' => array('integer', $this->getPrecision())
+                'prec' => array('integer', $this->getPrecision()),
+                'thousands_delim_type' => array('text', $this->getThousandsDelimType())
 			)
 		);
 
@@ -246,13 +253,14 @@ class assAccountingQuestion extends assQuestion
 
 		// get the question data
         $result = $ilDB->query(
-            "SELECT account_hash, variables_def, prec FROM il_qpl_qst_accqst_data "
+            "SELECT account_hash, variables_def, prec, thousands_delim_type FROM il_qpl_qst_accqst_data "
             . " WHERE question_fi =" . $ilDB->quote($question_id, 'integer'));
         $data = $ilDB->fetchAssoc($result);
 
         $hash = $data['account_hash'];
         $this->setVariablesXML($data['variables_def']);
         $this->setPrecision($data['prec']);
+        $this->setThousandsDelimType($data['thousands_delim_type']);
 
         // get the hash value for accounts definition
 		$result = $ilDB->query(
@@ -844,6 +852,40 @@ class assAccountingQuestion extends assQuestion
     {
         $this->precision = (int) $precision;
     }
+
+    /**
+     * Get the thosands delimiter type set by this question
+     */
+    public function getThousandsDelimType()
+    {
+        return $this->thousands_delim_type;
+    }
+
+    /**
+     * Set the thousands delimiter type set by this question
+     * @var string  $delim
+     */
+    public function setThousandsDelimType($delim_type = '')
+    {
+        $this->thousands_delim_type = $delim_type;
+    }
+
+    /**
+     * Get the effective thousands delimiter
+     * The global configured delimiter will be used if the type is empty or a setting by question is not allowed
+     */
+    public function getThousandsDelim()
+    {
+        $config = $this->plugin->getConfig();
+
+        if ($config->thousands_delim_per_question) {
+            return $config->getThousandsDelim($this->thousands_delim_type);
+        }
+        else {
+            return $config->getThousandsDelim();
+        }
+    }
+
 
     /**
      * Check if two values are equal

@@ -32,9 +32,12 @@ Version History
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.8.6 (2020-08-04)
+* Optional Definition of thousands delimiter per question
+
 Version 1.8.5 (2020-05-27)
 --------------------------
-* Definition of thousands delimiter fpr the presentation of centered and calculated values
+* Definition of thousands delimiter for the presentation of centered and calculated values
 
 Version 1.8.4 (2020-05-21)
 --------------------------

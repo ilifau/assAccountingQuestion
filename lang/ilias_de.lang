@@ -85,3 +85,6 @@ thousands_delim_type_info#:#Dieses Zeichen wird verwendet, um Tausenderblöcke z
 delim_none#:#Keine Trennung
 delim_dot#:#Punkt
 delim_space#:#Leerzeichen
+thousands_delim_per_question#:#Änderung pro Frage
+thousands_delim_per_question_info#:#Erlaube die Änderung des Tausender-Trennzeichens für jede einzelne Frage. Falls nicht in der Frage gesetzt, wird die obige Voreinstellung benutzt.
+delim_default#:#Plattform-Standard (%s)

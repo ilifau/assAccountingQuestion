@@ -85,3 +85,6 @@ thousands_delim_type_info#:#This delimiter is used to separate blocks of thousan
 delim_none#:#No Delimiter
 delim_dot#:#Dot
 delim_space#:#Space
+thousands_delim_per_question#:#Changeable per Question
+thousands_delim_per_question_info#:#Allow a change of the thousands delimiter per question. The default above will be used if it is not set in the question.
+delim_default#:#Platform Standard (%s)

@@ -189,6 +189,6 @@ abstract class ilAccqstVariable
      */
     public function getDisplay()
     {
-        return $this->plugin->toString($this->value, $this->question->getPrecision());
+        return $this->plugin->toString($this->value, $this->question->getPrecision(), $this->question->getThousandsDelim());
     }
 }
