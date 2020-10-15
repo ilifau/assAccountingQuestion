@@ -208,6 +208,26 @@ class assAccountingQuestionGUI extends assQuestionGUI
             $tpl->setVariable("DUMP", $error . $dump);
         }
         $item->setHTML($tpl->get());
+
+        // upload variables definition
+        $subitem = new ilFileInputGUI($this->plugin->txt('variables_file'), 'variables_file');
+        $subitem->setSuffixes(array('xml'));
+        $item->addSubItem($subitem);
+
+        // download variables definition
+        if (strlen(($this->object->getVariablesXML()))) {
+            $this->ctrl->setParameter($this, 'xmltype', 'variables');
+            $tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_form_custom.html');
+            $tpl->setCurrentBlock('button');
+            $tpl->setVariable('BUTTON_HREF', $this->ctrl->getLinkTarget($this, 'downloadXml'));
+            $tpl->setVariable('BUTTON_TEXT', $this->plugin->txt('download_variables_xml'));
+            $tpl->ParseCurrentBlock();
+
+            $subitem = new ilcustomInputGUI('');
+            $subitem->setHTML($tpl->get());
+            $item->addSubItem($subitem);
+        }
+
         $form->addItem($item);
 
 
@@ -221,6 +241,19 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $item->setValue($this->object->getPrecision());
         $form->addItem($item);
 
+        // thousands delimiter type
+        if ($this->plugin->getConfig()->thousands_delim_per_question) {
+            $td = new ilSelectInputGUI($this->plugin->txt('thousands_delim_type'), 'thousands_delim_type');
+            $td->setInfo($this->plugin->txt('thousands_delim_type_info'));
+            $td->setOptions(array(
+                '' => sprintf($this->plugin->txt('delim_default'), $this->plugin->getConfig()->getThousandsDelimText()),
+                assAccountingQuestionConfig::DELIM_NONE => $this->plugin->txt('delim_none'),
+                assAccountingQuestionConfig::DELIM_DOT => $this->plugin->txt('delim_dot'),
+                assAccountingQuestionConfig::DELIM_SPACE => $this->plugin->txt('delim_space'),
+            ));
+            $td->setValue($this->object->getThousandsDelimType());
+            $form->addItem($td);
+        }
 
         // add the existing booking parts
 		$parts = $this->object->getParts();
@@ -366,7 +399,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			// write the basic data
 			$this->writeQuestionGenericPostData();
 
-			// get the acccounts definition either by file upload or post
+			// get the accounts definition either by file upload or post
 			if (file_exists($_FILES["accounts_file"]["tmp_name"])) {
 				$accounts_xml = file_get_contents($_FILES["accounts_file"]["tmp_name"]);
 			} else {
@@ -378,8 +411,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$error .= $this->plugin->txt('xml_accounts_error');
 			}
 
-			// get and check the variables XML
-            $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
+            // get the variables definition either by file upload or post
+            if (file_exists($_FILES["variables_file"]["tmp_name"])) {
+                $variables_xml = file_get_contents($_FILES["variables_file"]["tmp_name"]);
+            } else {
+                $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
+            }
+
+            // check the variables XML but save it anyway
             if(!$this->object->setVariablesXML($variables_xml))
             {
                 $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
@@ -389,8 +428,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
                 $error .= $this->plugin->txt('xml_variables_error') . '<br />' . $this->object->getAnalyzeError();
             }
 
+            // calculation tolerance
             $this->object->setPrecision($_POST['precision']);
             $this->object->setLifecycle(ilAssQuestionLifecycle::getInstance($_POST['lifecycle']));
+
+            // thousands delimiter type
+            if ($this->plugin->getConfig()->thousands_delim_per_question) {
+                $this->object->setThousandsDelimType($_POST['thousands_delim_type']);
+            }
 
 			// sort the part positions
 			$positions = array();
@@ -462,10 +507,15 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$part_obj = $this->object->getPart($_GET['part_id']);
 				$file = $part_obj->getBookingXML();
 				$filename = 'booking' . $part_obj->getPartId() . '.xml';
-
 				break;
 
-			default:
+            case 'variables':
+                $file = $this->object->getVariablesXML();
+                $filename = 'variables' .  $this->object->getId() . '.xml';
+                break;
+
+
+            default:
 				$this->editQuestion();
 				return;
 		}
@@ -976,8 +1026,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$tpl->setCurrentBlock('booking_row');
 				$tpl->setVariable('LEFT_ACCOUNT', (string)$row['leftAccountText']);
 				$tpl->setVariable('RIGHT_ACCOUNT', (string)$row['rightAccountText']);
-				$tpl->setVariable('LEFT_VALUE', $this->plugin->toString($row['leftValueMoney'], $this->object->getPrecision()));
-				$tpl->setVariable('RIGHT_VALUE', $this->plugin->toString($row['rightValueMoney'], $this->object->getPrecision()));
+				$tpl->setVariable('LEFT_VALUE', empty($row['leftValueMoney']) ? '' :  $this->plugin->toString($row['leftValueMoney'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
+				$tpl->setVariable('RIGHT_VALUE', empty($row['rightValueMoney']) ? '' :  $this->plugin->toString($row['rightValueMoney'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
 				if ($a_show_points)
 				{
 					$tpl->setVariable('LEFT_POINTS', (string)$row['leftPoints']);
@@ -997,8 +1047,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// sum row of the record
 		$tpl->setCurrentBlock('sum_row');
 		$tpl->setVariable('TXT_SUM', $this->plugin->txt('label_sum') . ': ');
-		$tpl->setVariable('SUM_VALUES_LEFT',  $this->plugin->toString($record['sumValuesLeft'], $this->object->getPrecision()));
-		$tpl->setVariable('SUM_VALUES_RIGHT', $this->plugin->toString($record['sumValuesRight'], $this->object->getPrecision()));
+		$tpl->setVariable('SUM_VALUES_LEFT',  $this->plugin->toString($record['sumValuesLeft'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
+		$tpl->setVariable('SUM_VALUES_RIGHT', $this->plugin->toString($record['sumValuesRight'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
 		if ($a_show_points)
 		{
 			$tpl->setVariable('SUM_POINTS_LEFT', (string)$record['sumPointsLeft']);

@@ -33,6 +33,14 @@ Version History
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
 
+Version 1.9.1 (2020-10-15)
+--------------------------
+* Optional Definition of thousands delimiter per question
+* Definition of thousands delimiter for the presentation of centered and calculated values
+* Use precision also for calculated variables (substituted variables are reounded before)
+* Suppress display of zeros in empty solution lines
+* Upload and download of variables XML
+
 Version 1.9.0 (2020-05-08)
 --------------------------
 * Updated for ILIAS 6

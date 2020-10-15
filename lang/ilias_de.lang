@@ -75,4 +75,16 @@ forbidden_self_reference#:#Die Variable "%s" darf sich nicht selbst referenziere
 unknown_variable_reference#:#Die Variable "%s" verwendet eine nicht definierte Variable "%s".
 var_not_calculated#:#Die Variable "%" konnte nicht berechnet werden.
 precision#:#Genauigkeit
-precision_info#:#Nachkommastellen, auf die bei Vergleichen zweier Werte geprüft wird. Bei 1 muss die Differenz kleiner 0,1 sein, bei 2 kleiner als 0,01.
+precision_info#:#Nachkommastellen, auf die Variablen vor Berechnungen gerundet werden und auf die bei Vergleichen zweier Werte geprüft wird. Bei 1 muss die Differenz kleiner 0,1 sein, bei 2 kleiner als 0,01.
+variables_file#:#Variablen-Definition hochladen
+download_variables_xml#:#Variablen-Definition herunterladen
+settings_saved#:#Die Einstellungen wurden gespeichert.
+plugin_configuration#:#Plugin-Konfiguration
+thousands_delim_type#:#Tausender-Trennung
+thousands_delim_type_info#:#Dieses Zeichen wird verwendet, um Tausenderblöcke zu trennen, wenn Nutzereingaben oder berechnete Variablen in Ergebnissen präsentiert werden. Vordefinierte Werte werden ohne Umformatierung so präsentiert, wie sie definiert wurden.
+delim_none#:#Keine Trennung
+delim_dot#:#Punkt
+delim_space#:#Leerzeichen
+thousands_delim_per_question#:#Änderung pro Frage
+thousands_delim_per_question_info#:#Erlaube die Änderung des Tausender-Trennzeichens für jede einzelne Frage. Falls nicht in der Frage gesetzt, wird die obige Voreinstellung benutzt.
+delim_default#:#Plattform-Standard (%s)

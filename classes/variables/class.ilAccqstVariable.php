@@ -165,6 +165,16 @@ abstract class ilAccqstVariable
 
 
     /**
+     * Get a numeric string value for calculations
+     * The value is rounded by the given precision
+     * @return float|null
+     */
+    public function getNumeric()
+    {
+        return number_format($this->plugin->toFloat($this->value), $this->question->getPrecision(), '.', '');
+    }
+
+    /**
      * Get the string value of the variable
      * @return string|null
      */
@@ -179,6 +189,6 @@ abstract class ilAccqstVariable
      */
     public function getDisplay()
     {
-        return $this->plugin->toString($this->value, $this->question->getPrecision());
+        return $this->plugin->toString($this->value, $this->question->getPrecision(), $this->question->getThousandsDelim());
     }
 }

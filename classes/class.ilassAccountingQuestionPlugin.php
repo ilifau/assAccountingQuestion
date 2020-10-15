@@ -28,6 +28,20 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
         return $this->txt($this->getQuestionType());
     }
 
+
+    /**
+     * Get the global configuration
+     * @return assAccountingQuestionConfig
+     */
+    public function getConfig()
+    {
+        if (!isset($this->config)) {
+            $this->includeClass('class.assAccountingQuestionConfig.php');
+            $this->config = new assAccountingQuestionConfig($this);
+        }
+        return $this->config;
+    }
+
     /**
      * Define if debugging outputs should be shown
      * @return bool
@@ -70,23 +84,24 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
      * Get a value as string (decimals are separated by ,)
      * @param mixed $value
      * @param int   $precision for showing numbers
+     * @param string  $thousands_delim  for showing numbers
      * @return string
      */
-    public function toString($value = null,  $precision = null)
+    public function toString($value = null,  $precision = null, $thousands_delim = '')
     {
         try {
             if (is_string($value)) {
                 return $value;
             }
             else {
-                if (is_float($value) && is_int($precision)) {
-                    $string = number_format($value, $precision, ',', '.');
+                if ((is_int($value) || is_float($value)) && is_int($precision)) {
+                    $string = number_format($value, $precision, ',', $thousands_delim);
                 }
                 else {
                     $string = strval($value);
                     $string = str_replace('.', ',', $string);
+                    $string = str_replace(' ', '', $string);
                 }
-                $string = str_replace(' ', '', $string);
 
                 return $string;
             }

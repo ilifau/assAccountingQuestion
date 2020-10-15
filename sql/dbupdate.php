@@ -141,4 +141,21 @@ if(!$ilDB->tableColumnExists('il_qpl_qst_accqst_data', 'prec'))
     );
 }
 ?>
+<#7>
+<?php
+/*
+ * Create hash table for accounts definitions
+ */
+if(!$ilDB->tableColumnExists('il_qpl_qst_accqst_data', 'thousands_delim_type'))
+{
+    $ilDB->addTableColumn("il_qpl_qst_accqst_data", 'thousands_delim_type',
+        array(
+            'type' => 'text',
+            'length' => 10,
+            'notnull' => false,
+            'default' => null
+        )
+    );
+}
+?>
 
