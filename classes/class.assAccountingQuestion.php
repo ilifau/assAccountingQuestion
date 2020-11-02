@@ -1375,15 +1375,16 @@ class assAccountingQuestion extends assQuestion
             $worksheet->setCell($row, 2, $data['headerRight']);
 			$row++;
 
-			foreach($data['record']['rows'] as $r)
-			{
-				$left =  $r['leftAccountText'] . ' ' . $r['leftValueRaw']. ' ('. $r['leftPoints']. ' '. ($r['leftPoints'] == 1 ? $point : $points) . ')';
-				$right =  $r['rightAccountText'] . ' ' . $r['rightValueRaw']. ' ('. $r['rightPoints']. ' '. ($r['rightPoints'] == 1 ? $point : $points) . ')';
+			if (isset($data['record']['rows']) && is_array($data['record']['rows'])) {
+                foreach ($data['record']['rows'] as $r) {
+                    $left = $r['leftAccountText'] . ' ' . $r['leftValueRaw'] . ' (' . $r['leftPoints'] . ' ' . ($r['leftPoints'] == 1 ? $point : $points) . ')';
+                    $right = $r['rightAccountText'] . ' ' . $r['rightValueRaw'] . ' (' . $r['rightPoints'] . ' ' . ($r['rightPoints'] == 1 ? $point : $points) . ')';
 
-                $worksheet->setCell($row, 1, $left);
-                $worksheet->setCell($row, 2, $right);
-				$row++;
-			}
+                    $worksheet->setCell($row, 1, $left);
+                    $worksheet->setCell($row, 2, $right);
+                    $row++;
+                }
+            }
 
 			foreach (array('bonusOrderLeft','bonusOrderRight','malusCountLeft','malusCountRight','malusSumsDiffer') as $key)
 			{
