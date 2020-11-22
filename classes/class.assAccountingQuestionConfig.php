@@ -62,7 +62,7 @@ class assAccountingQuestionConfig
         }
         switch ($type) {
             case self::DELIM_SPACE:
-                return ' ';
+                return '&nbsp;';
             case self::DELIM_NONE:
                 return '';
             case self::DELIM_DOT:
