@@ -28,10 +28,15 @@ See [Anleitung](docs/Anleitung-Deutsch.pdf) or [Manual](docs/Manual-English.pdf)
 
 Version History
 ===============
+* Version 1.10 for ILIAS 7 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/main-ilias7
 * Version 1.9 for ILIAS 6 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias6
 * Version 1.8 for ILIAS 5.4 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias54
 * Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
 * Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
+
+Version 1.10.0 (2021-11-26)
+--------------------------
+* Updated for ILIAS 7
 
 Version 1.9.1 (2020-10-15)
 --------------------------
