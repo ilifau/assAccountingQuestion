@@ -1189,6 +1189,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
 					"parseQuestion", "saveEdit"),
 				$classname);*/
+
 		}
 
 		// add tab for question feedback within common class assQuestionGUI
