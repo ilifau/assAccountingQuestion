@@ -1184,11 +1184,11 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$url = "";
 			if ($classname) $url = $this->ctrl->getLinkTargetByClass($classname, "editQuestion");
 			// edit question properties
-			$ilTabs->addTarget("edit_properties",
+			/*$ilTabs->addTarget("edit_properties",
 				$url,
 				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
 					"parseQuestion", "saveEdit"),
-				$classname);
+				$classname);*/
 		}
 
 		// add tab for question feedback within common class assQuestionGUI
