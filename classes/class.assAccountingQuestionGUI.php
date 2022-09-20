@@ -1177,7 +1177,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 
 			// preview
-			$this->addTab_QuestionPreview($ilTabs);
+			$this->addTab_Question($ilTabs);
 		}
 
 		if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
