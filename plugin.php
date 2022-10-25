@@ -12,7 +12,7 @@ $version = "1.20.0";
  
 // ilias min and max version; must always reflect the versions that should
 // run with the plugin
-$ilias_min_version = "7.13";
+$ilias_min_version = "7.10";
 $ilias_max_version = "7.999";
 
 // add the responsible person for the plugin
