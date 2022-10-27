@@ -28,9 +28,15 @@ See [Anleitung](docs/Anleitung-Deutsch.pdf) or [Manual](docs/Manual-English.pdf)
 
 Version History
 ===============
-* Version 1.8 for ILIAS 5.4 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias54
-* Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
-* Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
+
+Since the core maintenance for ILIAS 5.4 has ended, this plugin version is no longer maintained, too. Please update ILIAS and this plugin to the newest versions.
+
+* Version 1.8 for ILIAS 5.4 is available in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias54
+* Version 1.7 for ILIAS 5.3 is available in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
+* Version 1.5 for ILIAS 5.2 is available in https://github.com/ilifau/assAccountingQuestion/tree/master52+
+
+Version 1.8.7 (2022-10-27)
+* Solved Mantis #35055 (thx to mjansen for the PR)
 
 Version 1.8.6 (2020-08-04)
 * Optional Definition of thousands delimiter per question
