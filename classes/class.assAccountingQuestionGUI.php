@@ -56,6 +56,12 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	}
 
 
+    // fau: backwardCompatabilityAccQuestion - Update backward Compatability for Ilias 7.10 usage
+    public function addTab_Question($tabs) {
+        $this->addTab_QuestionPreview($tabs);
+    }
+    // .fau
+
 	/**
 	 * Command: edit the question
 	 */
