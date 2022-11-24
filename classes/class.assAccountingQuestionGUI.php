@@ -55,13 +55,6 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $DIC->globalScreen()->layout()->meta()->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css'.self::URL_SUFFIX, ''));
 	}
 
-
-    // fau: backwardCompatabilityAccQuestion - Update backward Compatability for Ilias 7.10 usage
-    public function addTab_QuestionPreview($ilTabs) {
-        $this->addTab_Question($ilTabs);
-    }
-    // .fau
-
 	/**
 	 * Command: edit the question
 	 */
@@ -1183,19 +1176,25 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 
 			// preview
-			$this->addTab_Question($ilTabs);
+            if (method_exists($this, 'addTabQuestion')) {
+                // >= 7.11
+                $this->addTab_Question($ilTabs);
+            }
+            if (method_exists($this, 'addTabQuestionPreview')) {
+                // <= 7.10
+                $this->addTab_QuestionPreview($ilTabs);
+            }
 		}
 
 		if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
 			$url = "";
 			if ($classname) $url = $this->ctrl->getLinkTargetByClass($classname, "editQuestion");
 			// edit question properties
-			/*$ilTabs->addTarget("edit_properties",
+			$ilTabs->addTarget("edit_properties",
 				$url,
 				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
 					"parseQuestion", "saveEdit"),
-				$classname);*/
-
+				$classname);
 		}
 
 		// add tab for question feedback within common class assQuestionGUI
