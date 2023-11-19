@@ -44,14 +44,7 @@ class assAccountingQuestion extends assQuestion
 	 * @var array
 	 */
 	private $accounts_data = [];
-
-	/**
-	 * Display mode of accounts in the select fields
-	 * Is set by setAccountsXML()
-	 * @var string
-	 */
-	private $accounts_display = 'beide'; // 'nummer', 'titel', 'beide'
-
+    
 
     /**
      * Search for title in the dropdowns
@@ -118,10 +111,6 @@ class assAccountingQuestion extends assQuestion
 
 		// init the plugin object
 		$this->getPlugin();
-
-		// include the needed classes
-		$this->plugin->includeClass('class.assAccountingQuestionPart.php');
-        $this->plugin->includeClass('variables/class.ilAccqstVariable.php');
 	}
 
 	/**
@@ -129,11 +118,15 @@ class assAccountingQuestion extends assQuestion
 	 */
 	public function getPlugin()
 	{
-		if ($this->plugin == null) {
-			$this->plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, "TestQuestionPool", "qst", "assAccountingQuestion");
+        global $DIC;
 
-		}
-		return $this->plugin;
+        if ($this->plugin == null)
+        {
+            /** @var ilComponentFactory $component_factory */
+            $component_factory = $DIC["component.factory"];
+            $this->plugin = $component_factory->getPlugin('accqst');
+        }
+        return $this->plugin;
 	}
 
 
@@ -142,7 +135,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @return boolean True, if the single choice question is complete for use, otherwise false
 	 */
-	public function isComplete()
+	public function isComplete() : bool
 	{
 		if (($this->title) and ($this->author) and ($this->question) and ($this->points > 0)) {
 			return true;
@@ -162,11 +155,11 @@ class assAccountingQuestion extends assQuestion
 	/**
 	 * Saves an assAccountingQuestion object to a database
 	 *
-	 * @param    string        original id
-	 * @param    boolean        save all parts, too
+	 * @param    string $original_id        original id
+	 * @param    boolean $a_save_parts       save all parts, too
 	 * @access    public
 	 */
-	function saveToDb($original_id = "", $a_save_parts = true)
+	function saveToDb($original_id = "", $a_save_parts = true) : void
 	{
 		global $DIC;
 
@@ -180,7 +173,11 @@ class assAccountingQuestion extends assQuestion
 		// save the basic data (implemented in parent)
 		// a new question is created if the id is -1
 		// afterwards the new id is set
-		$this->saveQuestionDataToDb($original_id);
+        if (empty($original_id == '')) {
+            $this->saveQuestionDataToDb();
+        } else {
+            $this->saveQuestionDataToDb((int) $original_id);
+        }
 
 		// save the account definition to a separate hash table
 		$hash = hash("md5", $this->getAccountsXML());
@@ -223,7 +220,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @param integer $question_id A unique key which defines the question in the database
 	 */
-	public function loadFromDb($question_id)
+	public function loadFromDb($question_id) : void
 	{
 		global $DIC;
 		$ilDB = $DIC->database();
@@ -234,18 +231,22 @@ class assAccountingQuestion extends assQuestion
 
 		$data = $ilDB->fetchAssoc($result);
 		$this->setId($question_id);
-		$this->setTitle($data["title"]);
-		$this->setComment($data["description"]);
-		$this->setSuggestedSolution($data["solution_hint"]);
+		$this->setTitle($data["title"] ?? '');
+		$this->setComment($data["description"] ?? '');
+		$this->setSuggestedSolution($data["solution_hint"] ?? '');
 		$this->setOriginalId($data["original_id"]);
-		$this->setObjId($data["obj_fi"]);
-		$this->setAuthor($data["author"]);
-		$this->setOwner($data["owner"]);
-		$this->setPoints($data["points"]);
-		$this->setLifecycle(ilAssQuestionLifecycle::getInstance($data['lifecycle']));
+		$this->setObjId($data["obj_fi"] ?? 0);
+		$this->setAuthor($data["author"] ?? '');
+		$this->setOwner($data["owner"] ?? -1);
+		$this->setPoints($data["points"] ?? 0);
 
-		$this->setQuestion(ilRTE::_replaceMediaObjectImageSrc($data["question_text"], 1));
-		$this->setEstimatedWorkingTime(substr($data["working_time"], 0, 2), substr($data["working_time"], 3, 2), substr($data["working_time"], 6, 2));
+		$this->setQuestion(ilRTE::_replaceMediaObjectImageSrc($data["question_text"] ?? '', 1));
+
+        try {
+            $this->setLifecycle(ilAssQuestionLifecycle::getInstance($data['lifecycle']));
+        } catch (ilTestQuestionPoolInvalidArgumentException $e) {
+            $this->setLifecycle(ilAssQuestionLifecycle::getDraftInstance());
+        }
 
 		try {
 			$this->setAdditionalContentEditingMode($data['add_cont_edit_mode']);
@@ -258,10 +259,10 @@ class assAccountingQuestion extends assQuestion
             . " WHERE question_fi =" . $ilDB->quote($question_id, 'integer'));
         $data = $ilDB->fetchAssoc($result);
 
-        $hash = $data['account_hash'];
-        $this->setVariablesXML($data['variables_def']);
-        $this->setPrecision($data['prec']);
-        $this->setThousandsDelimType($data['thousands_delim_type']);
+        $hash = $data['account_hash'] ?? '';
+        $this->setVariablesXML($data['variables_def'] ?? '');
+        $this->setPrecision($data['prec'] ?? 0);
+        $this->setThousandsDelimType($data['thousands_delim_type'] ?? '');
 
         // get the hash value for accounts definition
 		$result = $ilDB->query(
@@ -269,7 +270,7 @@ class assAccountingQuestion extends assQuestion
 			. " WHERE hash =" . $ilDB->quote($hash, 'text'));
 
 		$data = $ilDB->fetchAssoc($result);
-		$this->setAccountsXML($data["data"]);
+		$this->setAccountsXML($data["data"] ?? '');
 
 		// load the question parts
 		$this->loadParts();
@@ -296,14 +297,14 @@ class assAccountingQuestion extends assQuestion
      * @param string $author
      * @param string $owner
      * @param int $testObjId
-     * @return int
+     * @returvoid|integer Id of the clone or nothing.
      */
-	function duplicate($for_test = true, $title = "", $author = "", $owner = "", $testObjId = null)
+	function duplicate($for_test = true, $title = "", $author = "", $owner = "", $testObjId = null) : int
 	{
-		if ($this->getId() <= 0) {
-			// The question has not been saved. It cannot be duplicated
-			return 0;
-		}
+        if ($this->id <= 0) {
+            // The question has not been saved. It cannot be duplicated
+            return -1;
+        }
 
 		// make a real clone to keep the object unchanged
 		// therefore no local variables are needed for the original ids 
@@ -354,13 +355,13 @@ class assAccountingQuestion extends assQuestion
      * @access public
      * @param int $target_questionpool_id
      * @param string $title
-     * @return int
+     *  @return void|integer Id of the clone or nothing.
      */
 	function copyObject($target_questionpool_id, $title = "")
 	{
 		if ($this->getId() <= 0) {
 			// The question has not been saved. It cannot be duplicated
-			return 0;
+			return ;
 		}
 
 		// make a real clone to keep the object unchanged
@@ -399,7 +400,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @access public
 	 */
-	function syncWithOriginal()
+	function syncWithOriginal() : void
 	{
 		if( !$this->getOriginalId() )
 		{
@@ -549,16 +550,20 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * Data is set in class variable 'accounts_data' (not stored in db)
 	 *
-	 * @param    string        xml definition of the accounts
+	 * @param    string $a_accounts_xml       xml definition of the accounts
 	 * @return    boolean        definition is ok (true/false)
 	 */
 	public function setAccountsXML($a_accounts_xml)
 	{
 	    // default values
         $this->accounts_data = array();
-        $this->accounts_display = "beide";
 
-        $xml = @simplexml_load_string($a_accounts_xml);
+        try {
+            $xml = simplexml_load_string($a_accounts_xml);
+        }
+        catch (Exception $e) {
+        }
+        
 
 		if (!is_object($xml)) {
 			return false;
@@ -569,8 +574,8 @@ class assAccountingQuestion extends assQuestion
 			return false;
 		}
 
-		$display = (string) $xml['anzeige'];
-        $search = (string) $xml['suche'];
+		$display = (string) ($xml['anzeige'] ?? '');
+        $search = (string) ($xml['suche'] ?? '');
 
 		// init accounts data (not yed saved in db)
 		$data[] = array();
@@ -579,20 +584,20 @@ class assAccountingQuestion extends assQuestion
 			// each account is an array of properties
 			$account = array();
 
-			$account['title'] = (string)$child['titel'];
-			$account['number'] = (string)$child['nummer'];
+			$account['title'] = (string) ($child['titel'] ?? '');
+			$account['number'] = (string) ($child['nummer'] ?? '');
 
 			switch (strtolower($display)) {
 				case 'nummer':
-					$account['text'] = $account['number'];
+					$account['text'] = ($account['number'] ?? '');
 					break;
 
 				case 'titel':
-					$account['text'] = $account['title'];
+					$account['text'] = ($account['title'] ?? '');
 					break;
 
 				default:
-					$account['text'] = $account['number'] . ': ' . $account['title'];
+					$account['text'] = ($account['number']  ?? ''). ': ' . ($account['title'] ?? '');
 					break;
 			}
 
@@ -603,7 +608,6 @@ class assAccountingQuestion extends assQuestion
 		// set data if ok
         $this->accounts_xml = $a_accounts_xml;
         $this->accounts_data = $data;
-        $this->accounts_display = $display;
         $this->accounts_search_title = ($search == 'beide' || $search == 'titel');
 
 		return true;
@@ -617,22 +621,22 @@ class assAccountingQuestion extends assQuestion
 	 */
 	public function getAccountsData()
 	{
-		return (array) $this->accounts_data;
+		return $this->accounts_data;
 	}
 
 
 	/**
 	 * get the account according to an input text
 	 *
-	 * @param    string    input text
+	 * @param    string $a_text   input text
 	 * @return    array    account data ('number', 'title', 'text')
 	 */
 	public function getAccount($a_text)
 	{
 		foreach ($this->getAccountsData() as $account) {
-			if ((int)$account['number'] == (int)$a_text
-				or strtolower($account['title']) == strtolower($a_text)
-				or strtolower($account['text']) == strtolower($a_text)
+			if ((int) ($account['number'] ?? 0)  == (int) $a_text
+				or strtolower($account['title'] ?? '') == strtolower($a_text)
+				or strtolower($account['text'] ?? '') == strtolower($a_text)
 			) {
 				return $account;
 			}
@@ -642,14 +646,14 @@ class assAccountingQuestion extends assQuestion
 
 	/**
 	 * get the account text from an account number
-	 * @param string	Account number
+	 * @param string $number	Account number
 	 * @return string	Account text
 	 */
 	public function getAccountText($number)
 	{
 		foreach ($this->getAccountsData() as $account) {
-			if ($account['number'] == $number) {
-				return $account['text'];
+			if ((int) ($account['number'] ?? 0) == (int) $number) {
+				return $account['text'] ?? '';
 			}
 		}
 		return "";
@@ -722,7 +726,7 @@ class assAccountingQuestion extends assQuestion
      */
 	public function getVariables()
 	{
-		return (array) $this->variables;
+		return $this->variables;
 	}
 
 
@@ -937,19 +941,19 @@ class assAccountingQuestion extends assQuestion
 			// part_id is needed, because inputs are concatenated for storage
 			// @see self::getSolutionStored()
 			$xml = '<input part_id="'.$part_id.'">';
-			for ($row = 0; $row < (int)$part_obj->getMaxLines(); $row++)
+			for ($row = 0; $row < $part_obj->getMaxLines(); $row++)
 			{
 				$prefix = 'q_' . $this->getId() . '_part_' .$part_id . '_row_' . $row .'_';
 
 				$xml .= '<row ';
-				$xml .= 'rightValueMoney="' . (string) $_POST[$prefix.'amount_right'] . '" ';
-				$xml .= 'leftValueMoney="' . (string) $_POST[$prefix.'amount_left'] . '" ';
-				$xml .= 'rightValueRaw="' . (string) $_POST[$prefix.'amount_right'] . '" ';
-				$xml .= 'leftValueRaw="' . (string) $_POST[$prefix.'amount_left'] . '" ';
-				$xml .= 'rightAccountNum="' . (string) $_POST[$prefix.'account_right'] . '" ';
-				$xml .= 'leftAccountNum="' . (string) $_POST[$prefix.'account_left'] . '" ';
-				$xml .= 'rightAccountRaw="' . $this->getAccountText((string) $_POST[$prefix.'account_right']) . '" ';
-				$xml .= 'leftAccountRaw="' . $this->getAccountText((string) $_POST[$prefix.'account_left']) . '"/> ';
+				$xml .= 'rightValueMoney="' . ($_POST[$prefix.'amount_right'] ?? '') . '" ';
+				$xml .= 'leftValueMoney="' . ($_POST[$prefix.'amount_left'] ?? '') . '" ';
+				$xml .= 'rightValueRaw="' . ($_POST[$prefix.'amount_right'] ?? '') . '" ';
+				$xml .= 'leftValueRaw="' . ($_POST[$prefix.'amount_left'] ?? '') . '" ';
+				$xml .= 'rightAccountNum="' . ($_POST[$prefix.'account_right'] ?? '') . '" ';
+				$xml .= 'leftAccountNum="' . ($_POST[$prefix.'account_left'] ?? '') . '" ';
+				$xml .= 'rightAccountRaw="' . $this->getAccountText($_POST[$prefix.'account_right'] ?? '') . '" ';
+				$xml .= 'leftAccountRaw="' . $this->getAccountText($_POST[$prefix.'account_left'] ?? '') . '"/> ';
 			}
 			$xml .= '</input>';
 
@@ -971,9 +975,9 @@ class assAccountingQuestion extends assQuestion
 	 *        saveWorkingData()
 	 *        calculateReachedPointsForSolution()
 	 *
-	 * @param	integer		active id of the user
-	 * @param	integer		test pass
-	 * @param	mixed		true: get authorized solution, false: get intermediate solution, null: prefer intermediate
+	 * @param	integer	$active_id	active id of the user
+	 * @param	integer	$pass	test pass
+	 * @param	mixed $authorized		true: get authorized solution, false: get intermediate solution, null: prefer intermediate
 	 * @return  array    	value1 => value2
 	 */
 	public function getSolutionStored($active_id, $pass, $authorized = null)
@@ -991,8 +995,11 @@ class assAccountingQuestion extends assQuestion
 
 		$userSolution = array();
 		foreach ($rows as $row)
-		{
-			$userSolution[$row['value1']] = $row['value2'];
+		{   
+		    if (isset($row['value1'])) 
+            {
+		        $userSolution[$row['value1']] = $row['value2'] ?? '';
+		    }
 		}
 
 		return $userSolution;
@@ -1032,8 +1039,8 @@ class assAccountingQuestion extends assQuestion
                 // key 'input' is the user input
 				// keys 'student' and 'correct' are textual analyses, 'result' are the given points (not longer used)
 				$split = explode('_', $value1);
-			    $key = $split[1];
-			    $part_id = $split[2];
+			    $key = $split[1] ?? null;
+			    $part_id = $split[2] ?? 0;
 
 				if ($key == 'input')
 			    {
@@ -1093,7 +1100,7 @@ class assAccountingQuestion extends assQuestion
 	/**
 	 * Calculate the reached points from a solution array
 	 *
-	 * @param   array    value1 => value2
+	 * @param   array $solution   value1 => value2
 	 * @return  float    reached points
 	 */
 	protected function calculateReachedPointsForSolution($solution)
@@ -1116,7 +1123,7 @@ class assAccountingQuestion extends assQuestion
 	 * Save the submitted input in a preview session
 	 * @param ilAssQuestionPreviewSession $previewSession
 	 */
-	protected function savePreviewData(ilAssQuestionPreviewSession $previewSession)
+	protected function savePreviewData(ilAssQuestionPreviewSession $previewSession) : void
 	{
         $this->initVariablesFromUserSolution($previewSession->getParticipantsSolution());
         $userSolution = $this->addVariablesToUserSolution($this->getSolutionSubmit());
@@ -1135,7 +1142,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @see    self::getSolutionStored()
 	 */
-	function saveWorkingData($active_id, $pass = NULL,  $authorized = true)
+	function saveWorkingData($active_id, $pass = NULL,  $authorized = true) : bool
 	{
 		if (is_null($pass))
 		{
@@ -1187,7 +1194,7 @@ class assAccountingQuestion extends assQuestion
      *
      * @inheritdoc
      */
-    public function removeCurrentSolution($active_id, $pass, $authorized = true)
+    public function removeCurrentSolution($active_id, $pass, $authorized = true) : int
     {
         global $ilDB;
 
@@ -1230,7 +1237,7 @@ class assAccountingQuestion extends assQuestion
      *
      * @inheritdoc
      */
-    public function removeExistingSolutions($activeId, $pass)
+    public function removeExistingSolutions($activeId, $pass) : int
     {
         global $ilDB;
 
@@ -1259,7 +1266,7 @@ class assAccountingQuestion extends assQuestion
      *
      * @inheritdoc
      */
-    public function lookupForExistingSolutions($activeId, $pass)
+    public function lookupForExistingSolutions($activeId, $pass) : array
     {
         /** @var $ilDB \ilDBInterface  */
         global $ilDB;
@@ -1308,7 +1315,7 @@ class assAccountingQuestion extends assQuestion
 	 *
 	 * @return string The question type of the question
 	 */
-	public function getQuestionType()
+	public function getQuestionType() : string
 	{
 		return "assAccountingQuestion";
 	}
@@ -1334,7 +1341,7 @@ class assAccountingQuestion extends assQuestion
 	 * Collects all text in the question which could contain media objects
 	 * which were created with the Rich Text Editor
 	 */
-	function getRTETextWithMediaObjects()
+    protected function getRTETextWithMediaObjects() : string
 	{
 		$text = parent::getRTETextWithMediaObjects();
 		foreach ($this->getParts() as $part_obj) {
@@ -1346,7 +1353,7 @@ class assAccountingQuestion extends assQuestion
     /**
      * {@inheritdoc}
      */
-	public function setExportDetailsXLS($worksheet, $startrow, $active_id, $pass)
+	public function setExportDetailsXLS(ilAssExcelFormatHelper $worksheet,int $startrow, int $active_id, int $pass) : int
 	{
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(0) . $startrow, $this->plugin->txt($this->getQuestionType()));
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(1) . $startrow, $this->getTitle());
@@ -1371,14 +1378,14 @@ class assAccountingQuestion extends assQuestion
 			$point = $this->plugin->txt('point');
 			$points = $this->plugin->txt('points');
 
-            $worksheet->setCell($row, 1, $data['headerLeft']);
-            $worksheet->setCell($row, 2, $data['headerRight']);
+            $worksheet->setCell($row, 1, $data['headerLeft'] ?? '');
+            $worksheet->setCell($row, 2, $data['headerRight'] ?? '');
 			$row++;
 
 			if (isset($data['record']['rows']) && is_array($data['record']['rows'])) {
                 foreach ($data['record']['rows'] as $r) {
-                    $left = $r['leftAccountText'] . ' ' . $r['leftValueRaw'] . ' (' . $r['leftPoints'] . ' ' . ($r['leftPoints'] == 1 ? $point : $points) . ')';
-                    $right = $r['rightAccountText'] . ' ' . $r['rightValueRaw'] . ' (' . $r['rightPoints'] . ' ' . ($r['rightPoints'] == 1 ? $point : $points) . ')';
+                    $left = ($r['leftAccountText'] ?? '') . ' ' . ($r['leftValueRaw'] ?? '') . ' (' . ($r['leftPoints'] ?? '') . ' ' . (($r['leftPoints'] ?? 0) == 1 ? $point : $points) . ')';
+                    $right = ($r['rightAccountText'] ?? '') . ' ' . ($r['rightValueRaw'] ?? '') . ' (' . ($r['rightPoints'] ?? '') . ' ' . (($r['rightPoints'] ?? 0) == 1 ? $point : $points) . ')';
 
                     $worksheet->setCell($row, 1, $left);
                     $worksheet->setCell($row, 2, $right);
@@ -1388,7 +1395,7 @@ class assAccountingQuestion extends assQuestion
 
 			foreach (array('bonusOrderLeft','bonusOrderRight','malusCountLeft','malusCountRight','malusSumsDiffer') as $key)
 			{
-				if($data['record'][$key] != 0)
+				if(!empty($data['record'][$key]))
 				{
                     $worksheet->setCell($row, 1, $this->plugin->txt($key));
                     $worksheet->setCell($row, 2, $data['record'][$key] .' ' . (abs($data['record'][$key]) == 1 ? $point : $points));
@@ -1399,39 +1406,5 @@ class assAccountingQuestion extends assQuestion
 			$part++;
 		}
 		return $row + 1;
-	}
-
-	/**
-	 * Creates a question from a QTI file
-	 *
-	 * Receives parameters from a QTI parser and creates a valid ILIAS question object
-	 *
-	 * @param object $item The QTI item object
-	 * @param integer $questionpool_id The id of the parent questionpool
-	 * @param integer $tst_id The id of the parent test if the question is part of a test
-	 * @param object $tst_object A reference to the parent test object
-	 * @param integer $question_counter A reference to a question counter to count the questions of an imported question pool
-	 * @param array $import_mapping An array containing references to included ILIAS objects
-	 * @access public
-	 */
-	function fromXML(&$item, &$questionpool_id, &$tst_id, &$tst_object, &$question_counter, &$import_mapping, array $solutionhints = [])
-	{
-		$this->getPlugin()->includeClass("import/qti12/class.assAccountingQuestionImport.php");
-		$import = new assAccountingQuestionImport($this);
-		$import->fromXML($item, $questionpool_id, $tst_id, $tst_object, $question_counter, $import_mapping);
-	}
-
-	/**
-	 * Returns a QTI xml representation of the question and sets the internal
-	 * domxml variable with the DOM XML representation of the QTI xml representation
-	 *
-	 * @return string The QTI xml representation of the question
-	 * @access public
-	 */
-	function toXML($a_include_header = true, $a_include_binary = true, $a_shuffle = false, $test_output = false, $force_image_references = false)
-	{
-		$this->getPlugin()->includeClass("export/qti12/class.assAccountingQuestionExport.php");
-		$export = new assAccountingQuestionExport($this);
-		return $export->toXML($a_include_header, $a_include_binary, $a_shuffle, $test_output, $force_image_references);
 	}
 }

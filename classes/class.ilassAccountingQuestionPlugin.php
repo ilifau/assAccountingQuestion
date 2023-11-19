@@ -13,7 +13,7 @@
 */
 class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 {
-    final function getPluginName()
+    final function getPluginName() : string
     {
         return "assAccountingQuestion";
     }
@@ -23,7 +23,7 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
         return "assAccountingQuestion";
     }
 
-    final function getQuestionTypeTranslation()
+    final function getQuestionTypeTranslation() : string
     {
         return $this->txt($this->getQuestionType());
     }
@@ -36,7 +36,6 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
     public function getConfig()
     {
         if (!isset($this->config)) {
-            $this->includeClass('class.assAccountingQuestionConfig.php');
             $this->config = new assAccountingQuestionConfig($this);
         }
         return $this->config;

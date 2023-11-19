@@ -48,8 +48,8 @@ class assAccountingQuestionConfig
      */
     public function save()
     {
-        $this->settings->set('thousands_delim_type', (string) $this->thousands_delim_type);
-        $this->settings->set('thousands_delim_per_question', (string) $this->thousands_delim_per_question ? '1' : '0');
+        $this->settings->set('thousands_delim_type', $this->thousands_delim_type);
+        $this->settings->set('thousands_delim_per_question', $this->thousands_delim_per_question ? '1' : '0');
     }
 
     /**

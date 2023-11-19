@@ -45,14 +45,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	{
 	    global $DIC;
 		parent::__construct();
-		$this->plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, "TestQuestionPool", "qst", "assAccountingQuestion");
-		$this->plugin->includeClass("class.assAccountingQuestion.php");
+        /** @var ilComponentFactory $component_factory */
+        $component_factory = $DIC["component.factory"];
+        $this->plugin = $component_factory->getPlugin('accqst');
 		$this->object = new assAccountingQuestion();
-		$this->newUnitId = null;
 		if ($id >= 0) {
 			$this->object->loadFromDb($id);
 		}
-        $DIC->globalScreen()->layout()->meta()->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css'.self::URL_SUFFIX, ''));
+        $DIC->globalScreen()->layout()->meta()->addCss($this->plugin->getStyleSheetLocation('accqstStyles.css'.self::URL_SUFFIX));
 	}
 
 	/**
@@ -68,7 +68,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Command: save the question
 	 */
-	public function save()
+	public function save() : void
 	{
 		// assQuestionGUI::save() 
 		// - calls writePostData
@@ -85,7 +85,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Command: save and show page editor
 	 */
-	public function saveEdit()
+	public function saveEdit() : void
 	{
 		// assQuestionGUI::saveEdit() 
 		// - calls writePostData
@@ -112,14 +112,13 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			// checking post data was successful (add new booking)
 			$this->object->saveToDb();
 			$this->initQuestionForm(true);
-			$this->getQuestionTemplate();
-			$this->tpl->setVariable("QUESTION_DATA", $this->form->getHTML());
 		} else {
 			// checking post data not successful (review the form)
 			$this->form->setValuesByPost();
-			$this->getQuestionTemplate();
-			$this->tpl->setVariable("QUESTION_DATA", $this->form->getHTML());
 		}
+        $this->getQuestionTemplate();
+        $this->tpl->setVariable("QUESTION_DATA", $this->form->getHTML());
+
 	}
 
 	/**
@@ -128,9 +127,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	protected function deletePart()
 	{
 		if ($this->object->deletePart($_GET['part_id'])) {
-			ilUtil::sendSuccess($this->plugin->txt('part_deleted'), true);
+            $this->tpl->setOnScreenMessage('success', $this->plugin->txt('part_deleted'), true);
 		} else {
-			ilUtil::sendFailure($this->plugin->txt('part_not_deleted'), true);
+            $this->tpl->setOnScreenMessage('failure', $this->plugin->txt('part_not_deleted'), true);
 		}
 
 		$this->ctrl->redirect($this, 'editQuestion');
@@ -139,7 +138,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Creates an output of the edit form for the question
 	 *
-	 * @param    boolean        add a new booking to the form
+	 * @param    boolean  $add_booking      add a new booking to the form
 	 */
 	private function initQuestionForm($add_booking = false)
 	{
@@ -162,7 +161,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$item = new ilCustomInputGUI($this->plugin->txt('accounts_xml'));
 		$item->setInfo($this->plugin->txt('accounts_xml_info'));
 		$tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_edit_xml.html');
-		$tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($this->object->getAccountsXML()));
+		$tpl->setVariable("CONTENT", ilLegacyFormElementsUtil::prepareFormOutput($this->object->getAccountsXML()));
 		$tpl->setVariable("NAME", 'accounts_xml');
 		$item->setHTML($tpl->get());
 
@@ -191,9 +190,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
         $item = new ilCustomInputGUI($this->plugin->txt('variables_xml'));
         $item->setInfo($this->plugin->txt('variables_xml_info'));
         $tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_edit_xml.html');
-        $tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($this->object->getVariablesXML()));
+        $tpl->setVariable("CONTENT", ilLegacyFormElementsUtil::prepareFormOutput($this->object->getVariablesXML()));
         $tpl->setVariable("NAME", 'variables_xml');
         if ($this->plugin->isDebug()) {
+            $error = '';
             if (!$this->object->calculateVariables()) {
                 $error = $this->object->getAnalyzeError() . "\n";
             }
@@ -266,7 +266,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 
 		// add a new booking part
-		if (count($parts) == 0 or $add_booking == true) {
+		if (count($parts) == 0 || $add_booking) {
 			$this->initPartProperties($form, null, $i);
 		} else {
 			$form->addCommandButton('saveAddBooking', $this->plugin->txt('add_booking'));
@@ -341,7 +341,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$item = new ilCustomInputGUI($this->plugin->txt('booking_xml'));
 		$item->setInfo($this->plugin->txt('booking_xml_info'));
 		$tpl = $this->plugin->getTemplate('tpl.il_as_qpl_accqst_edit_xml.html');
-		$tpl->setVariable("CONTENT", ilUtil::prepareFormOutput($part_obj->getBookingXML()));
+		$tpl->setVariable("CONTENT", ilLegacyFormElementsUtil::prepareFormOutput($part_obj->getBookingXML()));
 		$tpl->setVariable("NAME", 'booking_xml_' . $part_obj->getPartId());
 		$item->setHTML($tpl->get());
 
@@ -389,7 +389,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 *
 	 * @return integer    0: question can be saved / 1: form is not complete
 	 */
-	public function writePostData($always = false)
+    protected function writePostData($always = false) : int
 	{
 		$this->initQuestionForm();
 		if ($this->form->checkInput()) {
@@ -472,7 +472,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 
 			if ($error != '') {
-				ilUtil::sendFailure($error, true);
+                $this->tpl->setOnScreenMessage('failure', $error, true);
 			}
 
 			// save taxonomy assignment
@@ -519,7 +519,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				return;
 		}
 
-		ilUtil::deliverData($file, $filename, 'text/xml', false);
+		ilUtil::deliverData($file, $filename, 'text/xml');
 	}
 
 
@@ -528,23 +528,17 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 *
 	 * @param integer $active_id The active user id
 	 * @param integer $pass The test pass
-	 * @param boolean $is_postponed Question is postponed
-	 * @param boolean $use_post_solutions Use post solutions
-	 * @param boolean $show_feedback Show a feedback
+	 * @param boolean $is_question_postponed Question is postponed
+	 * @param boolean $user_post_solutions User post solutions
+	 * @param boolean $show_specific_inline_feedback Show a feedback
 	 * @return string
 	 */
-	public function getTestOutput($active_id, $pass = NULL, $is_postponed = FALSE, $use_post_solutions = FALSE, $show_feedback = FALSE)
+	public function getTestOutput($active_id, $pass = NULL, $is_question_postponed = FALSE, $user_post_solutions = FALSE, $show_specific_inline_feedback = FALSE)
 	{
 		$solution = NULL;
 		// get the solution of the user for the active pass or from the last pass if allowed
 		if ($active_id)
 		{
-			if (!ilObjTest::_getUsePreviousAnswers($active_id, true))
-			{
-				if (is_null($pass)) $pass = ilObjTest::_getPass($active_id);
-			}
-
-
 			// get the stored variables (always authorized)
             // init and store them if they were not yet initialized
             $varsolution = $this->object->getSolutionStored($active_id, $pass, true);
@@ -559,7 +553,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 
 		$questionoutput = $this->getQuestionOutput($solution);
-		$pageoutput = $this->outQuestionPage("", $is_postponed, $active_id, $questionoutput);
+		$pageoutput = $this->outQuestionPage("", $is_question_postponed, $active_id, $questionoutput);
 		return $pageoutput;
 	}
 
@@ -613,7 +607,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		foreach ($parts as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($solutionParts[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id] ?? '');
 			$w_data = $part_obj->getWorkingData();
 
 			$tpl->setCurrentBlock('question_part');
@@ -638,14 +632,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
                 foreach ($accounts as $account)
                 {
                     $tpl->setCurrentBlock('accounts_left');
-                    $tpl->setVariable("ACCOUNT_VALUE", $account['number']);
-                    $tpl->setVariable("ACCOUNT_TEXT", $account['text']);
+                    $tpl->setVariable("ACCOUNT_VALUE", $account['number'] ?? '');
+                    $tpl->setVariable("ACCOUNT_TEXT", $account['text'] ?? '');
                     $tpl->parseCurrentBlock();
                 }
                 $tpl->setCurrentBlock('accounting_left');
-                $tpl->setVariable("SELECTED_ACCOUNT_LEFT_VALUE", $w_data["record"]['rows'][$i]['leftAccountNum']);
-				$tpl->setVariable("SELECTED_LEFT_ACCOUNT", $w_data["record"]['rows'][$i]['leftAccountRaw']);
-                $tpl->setVariable("DEBIT_AMOUNT", $w_data["record"]['rows'][$i]['leftValueRaw']);
+                $tpl->setVariable("SELECTED_ACCOUNT_LEFT_VALUE", ($w_data["record"]['rows'][$i]['leftAccountNum'] ?? ''));
+				$tpl->setVariable("SELECTED_LEFT_ACCOUNT", ($w_data["record"]['rows'][$i]['leftAccountRaw'] ?? ''));
+                $tpl->setVariable("DEBIT_AMOUNT", ($w_data["record"]['rows'][$i]['leftValueRaw'] ?? ''));
                 $tpl->parseCurrentBlock();
 			}
 
@@ -658,14 +652,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
                 foreach ($accounts as $account)
                 {
                     $tpl->setCurrentBlock('accounts_right');
-                    $tpl->setVariable("ACCOUNT_VALUE", $account['number']);
-                    $tpl->setVariable("ACCOUNT_TEXT", $account['text']);
+                    $tpl->setVariable("ACCOUNT_VALUE", ($account['number'] ?? ''));
+                    $tpl->setVariable("ACCOUNT_TEXT", ($account['text'] ?? ''));
                     $tpl->parseCurrentBlock();
                 }
                 $tpl->setCurrentBlock('accounting_right');
-                $tpl->setVariable("SELECTED_ACCOUNT_RIGHT_VALUE", $w_data["record"]['rows'][$i]['rightAccountNum']);
-                $tpl->setVariable("SELECTED_RIGHT_ACCOUNT", $w_data["record"]['rows'][$i]['rightAccountRaw']);
-                $tpl->setVariable("CREDIT_AMOUNT", $w_data["record"]['rows'][$i]['rightValueRaw']);
+                $tpl->setVariable("SELECTED_ACCOUNT_RIGHT_VALUE", ($w_data["record"]['rows'][$i]['rightAccountNum'] ?? ''));
+                $tpl->setVariable("SELECTED_RIGHT_ACCOUNT", ($w_data["record"]['rows'][$i]['rightAccountRaw'] ?? ''));
+                $tpl->setVariable("CREDIT_AMOUNT", ($w_data["record"]['rows'][$i]['rightValueRaw'] ?? ''));
                 $tpl->parseCurrentBlock();
             }
 
@@ -674,7 +668,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
             if ($this->plugin->isDebug()) {
                 $part_debug = print_r($part_obj->getBookingData(), true);
-                $tpl->setVariable('PART_DEBUG', ilUtil::prepareFormOutput($part_debug));
+                $tpl->setVariable('PART_DEBUG', ilLegacyFormElementsUtil::prepareFormOutput($part_debug));
             }
 		}
 
@@ -686,7 +680,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * Get the output for question preview
 	 * (called from ilObjQuestionPoolGUI)
 	 *
-	 * @param boolean    show only the question instead of embedding page (true/false)
+	 * @param boolean $show_question_only   show only the question instead of embedding page (true/false)
      * @return string
 	 */
 	public function getPreview($show_question_only = FALSE, $showInlineFeedback = false)
@@ -756,7 +750,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Get the HTML output of an empty part
 	 *
-	 * @param array        part data
+	 * @param array  $data      part data
      * @return string
 	 */
 	private function getPaperTable($data)
@@ -768,15 +762,15 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$tpl->setCurrentBlock('table_title');
 		if ($data['type'] == 'records')
 		{
-			$tpl->setVariable('TXT_TITLE_LEFT', $data['headerLeft'] ? $data['headerLeft'] : $this->plugin->txt('records_left'));
-			$tpl->setVariable('TXT_TITLE_RIGHT', $data['headerRight'] ? $data['headerRight'] : $this->plugin->txt('records_right'));
-			$tpl->setVariable('TXT_TITLE_CENTER', $data['headerCenter'] ? $data['headerCenter'] : $this->plugin->txt('records_center'));
+			$tpl->setVariable('TXT_TITLE_LEFT', $data['headerLeft'] ?? $this->plugin->txt('records_left'));
+			$tpl->setVariable('TXT_TITLE_RIGHT', $data['headerRight'] ?? $this->plugin->txt('records_right'));
+			$tpl->setVariable('TXT_TITLE_CENTER', $data['headerCenter'] ?? $this->plugin->txt('records_center'));
 		}
 		else
 		{
-			$tpl->setVariable('TXT_TITLE_LEFT', $data['headerLeft'] ? $data['headerLeft'] : $this->plugin->txt('t_account_left'));
-			$tpl->setVariable('TXT_TITLE_RIGHT', $data['headerRight'] ? $data['headerRight'] : $this->plugin->txt('t_account_right'));
-			$tpl->setVariable('TXT_TITLE_CENTER', $data['headerCenter'] ? $data['headerCenter'] : $this->plugin->txt('t_account_center'));
+			$tpl->setVariable('TXT_TITLE_LEFT', $data['headerLeft'] ?? $this->plugin->txt('t_account_left'));
+			$tpl->setVariable('TXT_TITLE_RIGHT', $data['headerRight'] ?? $this->plugin->txt('t_account_right'));
+			$tpl->setVariable('TXT_TITLE_CENTER', $data['headerCenter'] ?? $this->plugin->txt('t_account_center'));
 		}
 		$tpl->parseCurrentBlock();
 
@@ -829,13 +823,16 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$show_correct_solution = FALSE,
 		$show_manual_scoring = FALSE,
 		$show_question_text = TRUE
-	)
+	) : string
 	{
 		global $DIC;
 		$ilCtrl = $DIC->ctrl();
 		$ilAccess = $DIC->access();
 
-		// adjust the parameters for special cases
+        $show_correct_solution = false;
+        $show_grading_details = false;
+
+        // adjust the parameters for special cases
 		if ($ilCtrl->getCmd() == 'print'
 			and ($ilCtrl->getCmdClass() == 'ilobjquestionpoolgui' or $ilCtrl->getCmdClass() == 'ilobjtestgui'))
 		{
@@ -871,7 +868,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// get the submitted or stored user input
 		$solution = is_object($this->getPreviewSession()) ?
 			(array) $this->getPreviewSession()->getParticipantsSolution() :
-			(array) $this->object->getSolutionStored($active_id, $pass, true);
+			$this->object->getSolutionStored($active_id, $pass, true);
 
 		$solutionParts = $this->object->getSolutionParts($solution);
 		$this->object->initVariablesFromUserSolution($solution);
@@ -936,7 +933,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		// add the question text
 		$questiontext = $this->object->getQuestion();
-		if ($show_question_text == true)
+		if ($show_question_text)
 		{
 			$template->setVariable("QUESTIONTEXT", $this->object->prepareTextareaOutput($questiontext, TRUE));
 		}
@@ -980,8 +977,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	/**
 	 * Get the HTML output of solution table
 	 *
-	 * @param array        part data (user input or correct solution)
-	 * @param boolean    show the points of the part data
+	 * @param array $data       part data (user input or correct solution)
+	 * @param boolean $a_show_points   show the points of the part data
      * @return string
 	 */
 	private function getSolutionTable($data, $a_show_points = false)
@@ -1000,9 +997,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		// table title
 		$tpl->setCurrentBlock('table_title');
-		$tpl->setVariable('TXT_TITLE_LEFT', $data['headerLeft']);
-		$tpl->setVariable('TXT_TITLE_RIGHT', $data['headerRight']);
-		$tpl->setVariable('TXT_TITLE_CENTER', $data['headerCenter']);
+		$tpl->setVariable('TXT_TITLE_LEFT', (string) ($data['headerLeft'] ?? ''));
+		$tpl->setVariable('TXT_TITLE_RIGHT', (string) ($data['headerRight'] ?? ''));
+		$tpl->setVariable('TXT_TITLE_CENTER', (string) ($data['headerCenter'] ?? ''));
 		$tpl->setVariable('TITLE_COLSPAN', $title_colspan);
 		$tpl->parseCurrentBlock();
 
@@ -1017,20 +1014,20 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		$tpl->parseCurrentBlock();
 
 		// all rows of the record
-		$record = $data['record'];
+		$record = $data['record'] ?? [];
 		if (is_array($record['rows']) and !empty($record['rows']))
 		{
 			foreach ($record['rows'] as $row)
 			{
 				$tpl->setCurrentBlock('booking_row');
-				$tpl->setVariable('LEFT_ACCOUNT', (string)$row['leftAccountText']);
-				$tpl->setVariable('RIGHT_ACCOUNT', (string)$row['rightAccountText']);
+				$tpl->setVariable('LEFT_ACCOUNT', (string) ($row['leftAccountText'] ?? ''));
+				$tpl->setVariable('RIGHT_ACCOUNT', (string) ($row['rightAccountText'] ?? ''));
 				$tpl->setVariable('LEFT_VALUE', empty($row['leftValueMoney']) ? '' :  $this->plugin->toString($row['leftValueMoney'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
 				$tpl->setVariable('RIGHT_VALUE', empty($row['rightValueMoney']) ? '' :  $this->plugin->toString($row['rightValueMoney'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
 				if ($a_show_points)
 				{
-					$tpl->setVariable('LEFT_POINTS', (string)$row['leftPoints']);
-					$tpl->setVariable('RIGHT_POINTS', (string)$row['rightPoints']);
+					$tpl->setVariable('LEFT_POINTS', (string) ($row['leftPoints'] ?? ''));
+					$tpl->setVariable('RIGHT_POINTS', (string) ($row['rightPoints'] ?? ''));
 				}
 				$tpl->parseCurrentBlock();
 			}
@@ -1046,12 +1043,12 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		// sum row of the record
 		$tpl->setCurrentBlock('sum_row');
 		$tpl->setVariable('TXT_SUM', $this->plugin->txt('label_sum') . ': ');
-		$tpl->setVariable('SUM_VALUES_LEFT',  $this->plugin->toString($record['sumValuesLeft'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
-		$tpl->setVariable('SUM_VALUES_RIGHT', $this->plugin->toString($record['sumValuesRight'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
+		$tpl->setVariable('SUM_VALUES_LEFT',  empty($row['sumValuesLeft']) ? '' :  $this->plugin->toString($record['sumValuesLeft'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
+		$tpl->setVariable('SUM_VALUES_RIGHT', empty($row['sumValuesRight']) ? '' :  $this->plugin->toString($record['sumValuesRight'], $this->object->getPrecision(), $this->object->getThousandsDelim()));
 		if ($a_show_points)
 		{
-			$tpl->setVariable('SUM_POINTS_LEFT', (string)$record['sumPointsLeft']);
-			$tpl->setVariable('SUM_POINTS_RIGHT', (string)$record['sumPointsRight']);
+			$tpl->setVariable('SUM_POINTS_LEFT', (string) ($record['sumPointsLeft'] ?? ''));
+			$tpl->setVariable('SUM_POINTS_RIGHT', (string) ($record['sumPointsRight'] ?? ''));
 		}
 		$tpl->parseCurrentBlock();
 
@@ -1060,7 +1057,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		{
 			foreach (array('bonusOrderLeft', 'bonusOrderRight', 'malusCountLeft', 'malusCountRight', 'malusSumsDiffer') as $score)
 			{
-				if ($record[$score])
+				if (!empty($record[$score]))
 				{
 					$tpl->setCurrentBlock('record_scoring_row');
 					$tpl->setVariable('TXT_RECORD_SCORING', $this->plugin->txt($score) . ': ');
@@ -1075,21 +1072,8 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		return $tpl->get();
 	}
-
-
-	/**
-	 * Saves the feedback for a question
-	 */
-	public function saveFeedback()
-	{
-		include_once "./Services/AdvancedEditing/classes/class.ilObjAdvancedEditing.php";
-		$errors = $this->feedback(true);
-		$this->object->saveFeedbackGeneric(0, $_POST["feedback_incomplete"]);
-		$this->object->saveFeedbackGeneric(1, $_POST["feedback_complete"]);
-		$this->object->cleanupMediaObjectUsage();
-		parent::saveFeedback();
-	}
-
+    
+    
 	/**
 	 * Returns the answer specific feedback for the question
 	 *
@@ -1097,16 +1081,17 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 * @return string HTML Code with the answer specific feedback
 	 * @access public
 	 */
-	function getSpecificFeedbackOutput($userSolution)
+	function getSpecificFeedbackOutput($userSolution) : string
 	{
 		global $DIC;
 		$ilAccess = $DIC->access();
 
+        $show_points = false;
 		if (is_object($this->getPreviewSession()))
 		{
 			$show_points = true;
 		}
-		elseif ($ilAccess->checkAccess('write', '', $_GET['ref_id']))
+		elseif ($ilAccess->checkAccess('write', '', ($_GET['ref_id'] ?? '')))
 		{
 			$show_points = true;
 			$feedback_note = $this->plugin->txt('grading_details_note');
@@ -1128,14 +1113,14 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		foreach ($this->object->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($solutionParts[$part_id]);
+			$part_obj->setWorkingXML(($solutionParts[$part_id] ?? ''));
 			$part_obj->calculateReachedPoints();
 			$student_data = $part_obj->getWorkingData();
 
 			$template->setCurrentBlock('part');
 			$template->setVariable('SOLUTION', $this->getSolutionTable($student_data, $show_points));
 			$template->setVariable('TXT_SCORE', $this->plugin->txt('reached_score') . ': ');
-			$template->setVariable('SCORE', $student_data["sumPoints"]);
+			$template->setVariable('SCORE', ($student_data["sumPoints"] ?? ''));
 			$template->parseCurrentBlock();
 		}
 		// show like the question
@@ -1146,89 +1131,4 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		}
 		return $template->get();
 	}
-
-
-	/**
-	 * Sets the ILIAS tabs for this question type
-	 * called from ilObjTestGUI and ilObjQuestionPoolGUI
-	 */
-	public function setQuestionTabs()
-	{
-		global $DIC;
-		$rbacsystem = $DIC->rbac()->system();
-		$ilTabs = $DIC->tabs();
-
-		$this->ctrl->setParameterByClass("ilpageobjectgui", "q_id", $_GET["q_id"]);
-		$q_type = $this->object->getQuestionType();
-
-		if (strlen($q_type)) {
-			$classname = $q_type . "GUI";
-			$this->ctrl->setParameterByClass(strtolower($classname), "sel_question_types", $q_type);
-			$this->ctrl->setParameterByClass(strtolower($classname), "q_id", $_GET["q_id"]);
-		}
-
-		if ($_GET["q_id"]) {
-			if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
-				// edit page
-				$ilTabs->addTarget("edit_content",
-					$this->ctrl->getLinkTargetByClass("ilAssQuestionPageGUI", "edit"),
-					array("edit", "insert", "exec_pg"));
-			}
-
-			// preview
-            if (method_exists($this, 'addTabQuestion')) {
-                // >= 7.11
-                $this->addTab_Question($ilTabs);
-            }
-            if (method_exists($this, 'addTabQuestionPreview')) {
-                // <= 7.10
-                $this->addTab_QuestionPreview($ilTabs);
-            }
-		}
-
-		if ($rbacsystem->checkAccess('write', $_GET["ref_id"])) {
-			$url = "";
-			if ($classname) $url = $this->ctrl->getLinkTargetByClass($classname, "editQuestion");
-			// edit question properties
-			$ilTabs->addTarget("edit_properties",
-				$url,
-				array("editQuestion", "save", "cancel", "cancelExplorer", "linkChilds",
-					"parseQuestion", "saveEdit"),
-				$classname);
-		}
-
-		// add tab for question feedback within common class assQuestionGUI
-		$this->addTab_QuestionFeedback($ilTabs);
-
-		// add tab for question hint within common class assQuestionGUI
-		$this->addTab_QuestionHints($ilTabs);
-
-		if ($_GET["q_id"]) {
-			$ilTabs->addTarget("solution_hint",
-				$this->ctrl->getLinkTargetByClass($classname, "suggestedsolution"),
-				array("suggestedsolution", "saveSuggestedSolution", "outSolutionExplorer", "cancel",
-					"addSuggestedSolution", "cancelExplorer", "linkChilds", "removeSuggestedSolution"
-				),
-				$classname
-			);
-		}
-
-		// Assessment of questions sub menu entry
-		if ($_GET["q_id"]) {
-			$ilTabs->addTarget("statistics",
-				$this->ctrl->getLinkTargetByClass($classname, "assessment"),
-				array("assessment"),
-				$classname);
-		}
-
-		if (($_GET["calling_test"] > 0) || ($_GET["test_ref_id"] > 0)) {
-			$ref_id = $_GET["calling_test"];
-			if (strlen($ref_id) == 0) $ref_id = $_GET["test_ref_id"];
-			$ilTabs->setBackTarget($this->lng->txt("backtocallingtest"), "ilias.php?baseClass=ilObjTestGUI&cmd=questions&ref_id=$ref_id");
-		} else {
-			$ilTabs->setBackTarget($this->lng->txt("qpl"), $this->ctrl->getLinkTargetByClass("ilobjquestionpoolgui", "questions"));
-		}
-	}
-
-
 }

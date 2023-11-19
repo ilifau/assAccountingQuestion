@@ -18,18 +18,9 @@ class assAccountingQuestionImport extends assQuestionImport
 	/**
 	 * Creates a question from a QTI file
 	 *
-	 * Receives parameters from a QTI parser and creates a valid ILIAS question object
-	 *
-	 * @param object $item The QTI item object
-	 * @param integer $questionpool_id The id of the parent questionpool
-	 * @param integer $tst_id The id of the parent test if the question is part of a test
-	 * @param object $tst_object A reference to the parent test object
-	 * @param integer $question_counter A reference to a question counter to count the questions of an imported question pool
-	 * @param array $import_mapping An array containing references to included ILIAS objects
-	 * @param array $solutionhints
-	 * @access public
+	 * @ineritdoc 
 	 */
-	function fromXML(&$item, $questionpool_id, &$tst_id, &$tst_object, &$question_counter, &$import_mapping, array $solutionhints = [])
+	function fromXML(&$item, $questionpool_id, &$tst_id, &$tst_object, &$question_counter, $import_mapping): array
 	{
 		global $DIC;
 
@@ -39,7 +30,6 @@ class assAccountingQuestionImport extends assQuestionImport
 		// empty session variable for imported xhtml mobs
 		unset($_SESSION["import_mob_xhtml"]);
 		$presentation = $item->getPresentation(); 
-		$duration = $item->getDuration();
 		$now = getdate();
 		$created = sprintf("%04d%02d%02d%02d%02d%02d", $now['year'], $now['mon'], $now['mday'], $now['hours'], $now['minutes'], $now['seconds']);
 
@@ -109,7 +99,6 @@ class assAccountingQuestionImport extends assQuestionImport
 		$this->object->setOwner($ilUser->getId());
 		$this->object->setQuestion($this->object->QTIMaterialToString($item->getQuestiontext()));
 		$this->object->setObjId($questionpool_id);
-		$this->object->setEstimatedWorkingTime($duration["h"], $duration["m"], $duration["s"]);
 		$this->object->setAccountsXML(base64_decode($item->getMetadataEntry('accounts_content')));
         $this->object->setVariablesXML(base64_decode($item->getMetadataEntry('variables_content')));
 		$this->object->setPoints($item->getMetadataEntry("points"));
@@ -177,7 +166,7 @@ class assAccountingQuestionImport extends assQuestionImport
 				}
 				$ilLog->write($importfile);
 
-				$media_object =& ilObjMediaObject::_saveTempFileAsMediaObject(basename($importfile), $importfile, FALSE);
+				$media_object = ilObjMediaObject::_saveTempFileAsMediaObject(basename($importfile), $importfile, FALSE);
 				ilObjMediaObject::_saveUsage($media_object->getId(), "qpl:html", $this->object->getId());
 
 				// images in question text
@@ -233,6 +222,8 @@ class assAccountingQuestionImport extends assQuestionImport
 		{
 			$import_mapping[$item->getIdent()] = array("pool" => $this->object->getId(), "test" => 0);
 		}
+		
+		return $import_mapping;
 	}
 }
 

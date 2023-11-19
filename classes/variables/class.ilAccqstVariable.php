@@ -44,7 +44,11 @@ abstract class ilAccqstVariable
 
         $plugin = $question->getPlugin();
 
-        $xml = @simplexml_load_string($xml);
+        try {
+            $xml = simplexml_load_string($xml);
+        }
+        catch (Exception $e) {
+        }
         if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables')) {
             throw new ilException($plugin->txt('missing_element_variables'));
         }
@@ -82,7 +86,7 @@ abstract class ilAccqstVariable
                     throw new ilException(sprintf($plugin->txt('unknown_variable_type'), $name));
             }
 
-            $variable->initFromXmlElement($element, $plugin);
+            $variable->initFromXmlElement($element);
             $variables[$name] = $variable;
         }
 
@@ -167,7 +171,7 @@ abstract class ilAccqstVariable
     /**
      * Get a numeric string value for calculations
      * The value is rounded by the given precision
-     * @return float|null
+     * @return string
      */
     public function getNumeric()
     {

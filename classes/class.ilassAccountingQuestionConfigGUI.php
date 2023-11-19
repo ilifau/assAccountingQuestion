@@ -2,6 +2,7 @@
 /**
  * Copyright (c) 2020 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg
  * GPLv2, see LICENSE
+ * @ilCtrl_IsCalledBy ilassAccountingQuestionConfigGUI: ilObjComponentSettingsGUI
  */
 class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
 {
@@ -20,7 +21,7 @@ class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
     /** @var  ilToolbarGUI $toolbar */
     protected $toolbar;
 
-    /** @var ilTemplate $tpl */
+    /** @var ilGlobalTemplate $tpl */
     protected $tpl;
 
     /** @var ilassAccountingQuestionPlugin $plugin */
@@ -49,7 +50,7 @@ class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
     /**
      * Handles all commands, default is "configure"
      */
-    public function performCommand($cmd)
+    public function performCommand($cmd) : void
     {
         $this->plugin = $this->getPluginObject();
         $this->config = $this->plugin->getConfig();
@@ -93,7 +94,7 @@ class ilassAccountingQuestionConfigGUI extends ilPluginConfigGUI
         $this->config->thousands_delim_per_question = (bool) $form->getInput('thousands_delim_per_question');
         $this->config->save();
 
-        ilUtil::sendSuccess($this->plugin->txt('settings_saved'), true);
+        $this->tpl->setOnScreenMessage('success', $this->plugin->txt('settings_saved'), true);
         $this->ctrl->redirect($this, 'editConfiguration');
     }
 

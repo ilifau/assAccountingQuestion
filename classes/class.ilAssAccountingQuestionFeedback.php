@@ -21,7 +21,7 @@ class ilAssAccountingQuestionFeedback extends ilAssSingleOptionQuestionFeedback
      * object instance of current question
      * @var assAccountingQuestion
      */
-    protected $questionOBJ = null;
+    protected assQuestion $questionOBJ;
 
 
     /**
@@ -33,7 +33,7 @@ class ilAssAccountingQuestionFeedback extends ilAssSingleOptionQuestionFeedback
      * @param boolean $solutionCompleted
      * @return string $genericFeedbackTestPresentationHTML
      */
-    public function getGenericFeedbackTestPresentation($questionId, $solutionCompleted)
+    public function getGenericFeedbackTestPresentation($questionId, $solutionCompleted) : string
     {
         $html = parent::getGenericFeedbackTestPresentation($questionId, $solutionCompleted);
         return $this->questionOBJ->substituteVariables($html, assAccountingQuestion::SUB_DISPLAY);
