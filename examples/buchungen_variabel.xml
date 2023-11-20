@@ -1,0 +1,14 @@
+?<?xml version="1.0" encoding="utf-8" ?>
+<buchungssaetze
+        links="von"
+        mitte="Buchungen"
+        rechts="an"
+        zeilen="5"
+        summen_zeigen="1"
+        >
+    <satz	malus_anzahl_von="1" malus_anzahl_an="1" malus_summen="1">
+        <von 	konto="800" betrag="{var1}" punkte="1" />
+        <von 	konto="801" betrag="{var2}" punkte="1" />
+        <an 	konto="{konto}" betrag="{calc1}" punkte="1" />
+    </satz>
+</buchungssaetze>

@@ -133,11 +133,11 @@ class assAccountingQuestionImport extends assQuestionImport
 				// create and add a new part
 				/** @var assAccountingQuestionPart $part_obj */
 				$part_obj = $this->object->getPart();
-				$part_obj->setPosition($part['position']);
-				$part_obj->setText($part['text']);
-				$part_obj->setMaxPoints($part['max_points']);
-				$part_obj->setMaxLines($part['max_lines']);
-                $part_obj->setBookingXML(base64_decode($part['booking_def']));
+				$part_obj->setPosition($part['position'] ?? 0);
+				$part_obj->setText($part['text'] ?? '');
+				$part_obj->setMaxPoints($part['max_points'] ?? 0);
+				$part_obj->setMaxLines($part['max_lines'] ?? 1);
+                $part_obj->setBookingXML(base64_decode($part['booking_def'] ?? ''));
 				$part_obj->write();
 			}
 		}

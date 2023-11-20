@@ -27,6 +27,17 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
     {
         return $this->txt($this->getQuestionType());
     }
+    
+    public function uninstall() : bool
+    {
+        if (parent::uninstall()) {
+            $this->db->dropSequence('il_qpl_qst_accqst_part');
+            $this->db->dropTable('il_qpl_qst_accqst_part', false);
+            $this->db->dropTable('il_qpl_qst_accqst_hash', false);
+            $this->db->dropTable('il_qpl_qst_accqst_data', false);
+        }
+        return true;
+    }
 
 
     /**

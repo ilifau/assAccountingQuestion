@@ -828,9 +828,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		global $DIC;
 		$ilCtrl = $DIC->ctrl();
 		$ilAccess = $DIC->access();
-
-        $show_correct_solution = false;
+        
         $show_grading_details = false;
+        $grading_details_note = '';
 
         // adjust the parameters for special cases
 		if ($ilCtrl->getCmd() == 'print'
@@ -858,7 +858,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		{
 			$show_grading_details = true;
 		}
-		elseif ($ilAccess->checkAccess('write', '', $_GET['ref_id']))
+		elseif ($ilAccess->checkAccess('write', '',  $this->request->getRefId()))
 		{
 			$show_grading_details = true;
 			$grading_details_note = $this->plugin->txt('grading_details_note');
@@ -886,7 +886,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 			else
 			{
-				$part_obj->setWorkingXML($solutionParts[$part_id]);
+				$part_obj->setWorkingXML($solutionParts[$part_id] ?? '');
 				$part_obj->calculateReachedPoints();
 				$table_data = $part_obj->getWorkingData();
 			}

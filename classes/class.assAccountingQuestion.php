@@ -557,7 +557,8 @@ class assAccountingQuestion extends assQuestion
 	{
 	    // default values
         $this->accounts_data = array();
-
+        
+        $xml = null;
         try {
             $xml = simplexml_load_string($a_accounts_xml);
         }
@@ -1110,7 +1111,7 @@ class assAccountingQuestion extends assQuestion
 		foreach ($this->getParts() as $part_obj)
 		{
 			$part_id = $part_obj->getPartId();
-			$part_obj->setWorkingXML($solutionParts[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id] ?? '');
 			$points += $part_obj->calculateReachedPoints();
 		}
 

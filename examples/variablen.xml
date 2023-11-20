@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<variables>
+	<var name="var1" type="range" min="10" max="100" step="10" />
+	<var name="var2" type="select">
+		<val>80 EUR</val>
+		<val>90 EUR</val>
+	</var>
+	<var name="var3" type="switch" check="{var2}">
+		<case value="{var1}">Wie Var1</case>
+		<case max="80">80 gewählt</case>
+		<default>{var2}</default>
+	</var>
+	<var name="calc1" type="eval">
+		{var1}+{var2}
+	</var>
+	<var name="konto" type="select">
+		<val>300</val>
+		<val>301</val>
+		<val>303</val>
+	</var>
+</variables>

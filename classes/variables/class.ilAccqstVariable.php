@@ -58,8 +58,8 @@ abstract class ilAccqstVariable
             if ($element->getName() != 'var' || empty($element['name'])) {
                 throw new ilException($plugin->txt('missing_var_or_name'));
             }
-            $name = (string) $element['name'];
-            $type = (string) $element['type'];
+            $name = (string) $element['name'] ?? '';
+            $type = (string) $element['type'] ?? '';
 
             if (isset($variables[$name])) {
                 // variable is already defined

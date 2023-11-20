@@ -372,6 +372,7 @@ class assAccountingQuestionPart
 	public function setBookingXML($a_booking_xml, $a_substitute_variables = false)
 	{
 		// load the xml object
+        $xml = null;
         try {
             $xml = simplexml_load_string($a_booking_xml);
         }
@@ -657,6 +658,7 @@ class assAccountingQuestionPart
 		$correct = $this->booking_data['record'];
 
 		// use reference of working record to add calculated results
+        $this->working_data['record'] = ($this->working_data['record'] ?? []);
 		$student = &$this->working_data['record'];
 
 		// left and right side can be evaluated equally
@@ -670,23 +672,23 @@ class assAccountingQuestionPart
 			$lastMatch = -1;			// last matching correct row, start with -1 (none)
 
 			// scan the student rows of this side
-			for($s = 0; $s < count($student['rows']); $s++)
+			for($s = 0; $s < count($student['rows'] ?? []); $s++)
 			{
 				$srow = &$student['rows'][$s];	// allow manipulation
 
 				// find matching entry in correct rows of this side
-				for($c = 0; $c < count($correct['rows']); $c++)
+				for($c = 0; $c < count($correct['rows'] ?? []); $c++)
 				{
 					$crow = &$correct['rows'][$c];	// allow manipulation
 
-					if ($srow[$side.'AccountNum'] == $crow[$side.'AccountNum']
-						and $this->parent->equals($srow[$side.'ValueMoney'], $crow[$side.'ValueMoney'])
-						and empty($crow[$side.'Matched']))
+					if (($srow[$side.'AccountNum'] ?? '') == ($crow[$side.'AccountNum'] ?? '')
+						&& $this->parent->equals($srow[$side.'ValueMoney'] ?? 0, $crow[$side.'ValueMoney'] ?? 0)
+						&& empty($crow[$side.'Matched'] ?? false))
 					{
-						$srow[$side.'Points'] = $crow[$side.'Points'];
+						$srow[$side.'Points'] = ($crow[$side.'Points'] ?? 0);
 						$crow[$side.'Matched'] = true;
 
-						$sumPoints += $crow[$side.'Points'];
+						$sumPoints += ($crow[$side.'Points'] ?? 0);
 						$sumMatches++;
 
 						// order is broken when current matching row is before last matching row
@@ -705,25 +707,25 @@ class assAccountingQuestionPart
 			// give bonus for correct order if at least two correct bookings exist
 			if ($sumMatches > 1 && $matchOrder)
 			{
-				$student['bonusOrder'.$uside] = $correct['bonusOrder'.$uside];
+				$student['bonusOrder'.$uside] = $correct['bonusOrder'.$uside] ?? 0;
 			}
 		}
 
 		// total sum of points reached so far
 		$totalPoints =
-			$student['sumPointsLeft'] + $student['bonusOrderLeft']
-			+ $student['sumPointsRight'] + $student['bonusOrderRight'];
+            ($student['sumPointsLeft'] ?? 0) + ($student['bonusOrderLeft'] ?? 0)
+			+ ($student['sumPointsRight'] ?? 0) + ($student['bonusOrderRight'] ?? 0);
 
 		// malus for exceeding number of records on a side
 		foreach (array('Left', 'Right') as $uside)
 		{
-			if ($student['count'.$uside] > $correct['count'.$uside])
+			if (($student['count'.$uside] ?? 0) > ($correct['count'.$uside] ?? 0))
 			{
 				switch ($this->booking_data['type'])
 				{
 					case 't-account':
 						// limit the malus to the points reached on this side including bonus
-						$limit = -($student['sumPoints'.$uside] + $student['bonusOrder'.$uside]);
+						$limit = -(($student['sumPoints'.$uside] ?? 0) + ($student['bonusOrder'.$uside] ?? 0));
 						break;
 					case 'records':
 						// limit the malus to the points reached so far
@@ -734,17 +736,17 @@ class assAccountingQuestionPart
 					default:
 						$limit = 0;
 				}
-				$student['malusCount'.$uside] = max($correct['malusCount'.$uside], $limit);
-				$totalPoints += $student['malusCount'.$uside];
+				$student['malusCount'.$uside] = max($correct['malusCount'.$uside] ?? 0, $limit);
+				$totalPoints += ($student['malusCount'.$uside] ?? 0);
 			}
 		}
 
 		// give malus for different sum of values on both sides
-		if (!$this->parent->equals($student['sumValuesLeft'],  $student['sumValuesRight']))
+		if (!$this->parent->equals($student['sumValuesLeft'] ?? 0,  $student['sumValuesRight'] ?? 0))
 		{
 			// limit the malus to the points reached so far
-			$student['malusSumsDiffer'] = max($correct['malusSumsDiffer'], -$totalPoints);
-			$totalPoints += $student['malusSumsDiffer'];
+			$student['malusSumsDiffer'] = max($correct['malusSumsDiffer'] ?? 0, -$totalPoints);
+			$totalPoints += $student['malusSumsDiffer'] ?? 0;
 		}
 
 		// the total points for this part will not be negative
