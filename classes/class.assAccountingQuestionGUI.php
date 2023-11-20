@@ -620,7 +620,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$tpl->setVariable("FOURTH_COLUMN_HEADER", "");
 			$tpl->setVariable("FIFTH_COLUMN_HEADER", $part_obj->getBookingData('headerRight'));
 
-			$num_rows = $part_obj->getBookingData('showLines');
+			$num_rows = $part_obj->getBookingData('showLines') ?? 0;
 
 			//LEFT
 			for ($i = 0; $i < $num_rows; $i++)
@@ -1015,7 +1015,9 @@ class assAccountingQuestionGUI extends assQuestionGUI
 
 		// all rows of the record
 		$record = $data['record'] ?? [];
-		if (is_array($record['rows']) and !empty($record['rows']))
+        $rows = $record['rows'] ?? [];
+        
+		if (!empty($rows))
 		{
 			foreach ($record['rows'] as $row)
 			{

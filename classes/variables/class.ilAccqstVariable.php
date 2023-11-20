@@ -40,20 +40,26 @@ abstract class ilAccqstVariable
      */
     public static function getVariablesFromXmlCode($xml, $question)
     {
+        $xml = trim($xml);
+        if (empty($xml)) {
+            return [];
+        }
+
         $variables = [];
-
         $plugin = $question->getPlugin();
-
+        
+        $root = null;
         try {
-            $xml = simplexml_load_string($xml);
+            $root = simplexml_load_string($xml);
         }
         catch (Exception $e) {
         }
-        if (!($xml instanceof SimpleXMLElement && $xml->getName() == 'variables')) {
+        
+        if (!($root instanceof SimpleXMLElement && $root->getName() == 'variables')) {
             throw new ilException($plugin->txt('missing_element_variables'));
         }
 
-        foreach ($xml->children() as $element)
+        foreach ($root->children() as $element)
         {
             if ($element->getName() != 'var' || empty($element['name'])) {
                 throw new ilException($plugin->txt('missing_var_or_name'));

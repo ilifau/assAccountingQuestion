@@ -351,7 +351,7 @@ class assAccountingQuestionPart
 	public function getBookingData($arg = FALSE)
 	{
 		if (is_string($arg)) {
-			return $this->booking_data[$arg] ?? [];
+			return $this->booking_data[$arg] ?? null;
 		} else {
 			return $this->booking_data;
 		}
@@ -655,7 +655,7 @@ class assAccountingQuestionPart
 		}
 
 		// use copy of booking record to forget calculation flags at the end
-		$correct = $this->booking_data['record'];
+		$correct = $this->booking_data['record'] ?? [];
 
 		// use reference of working record to add calculated results
         $this->working_data['record'] = ($this->working_data['record'] ?? []);

@@ -173,10 +173,10 @@ class assAccountingQuestion extends assQuestion
 		// save the basic data (implemented in parent)
 		// a new question is created if the id is -1
 		// afterwards the new id is set
-        if (empty($original_id == '')) {
+        if ($original_id == '') {
             $this->saveQuestionDataToDb();
         } else {
-            $this->saveQuestionDataToDb((int) $original_id);
+            $this->saveQuestionDataToDb($original_id);
         }
 
 		// save the account definition to a separate hash table
