@@ -658,8 +658,7 @@ class assAccountingQuestionPart
 		$correct = $this->booking_data['record'] ?? [];
 
 		// use reference of working record to add calculated results
-        $this->working_data['record'] = ($this->working_data['record'] ?? []);
-		$student = &$this->working_data['record'];
+		$student = $this->working_data['record'] ?? [];
 
 		// left and right side can be evaluated equally
 		foreach (array('left', 'right') as $side)
@@ -668,25 +667,26 @@ class assAccountingQuestionPart
 
 			$sumPoints = 0;				// sum of points
 			$sumMatches = 0;			// sum of matching rows
+            $matched = [];              // notion of matched correct bookings
 			$matchOrder = true;			// assume a correct matching order, set to false on break
 			$lastMatch = -1;			// last matching correct row, start with -1 (none)
 
 			// scan the student rows of this side
 			for($s = 0; $s < count($student['rows'] ?? []); $s++)
 			{
-				$srow = &$student['rows'][$s];	// allow manipulation
+				$srow = $student['rows'][$s];	// allow manipulation
 
 				// find matching entry in correct rows of this side
 				for($c = 0; $c < count($correct['rows'] ?? []); $c++)
 				{
-					$crow = &$correct['rows'][$c];	// allow manipulation
+					$crow = $correct['rows'][$c];	// allow manipulation
 
 					if (($srow[$side.'AccountNum'] ?? '') == ($crow[$side.'AccountNum'] ?? '')
 						&& $this->parent->equals($srow[$side.'ValueMoney'] ?? 0, $crow[$side.'ValueMoney'] ?? 0)
-						&& empty($crow[$side.'Matched'] ?? false))
+						&& empty($matched[$c][$side]))
 					{
-						$srow[$side.'Points'] = ($crow[$side.'Points'] ?? 0);
-						$crow[$side.'Matched'] = true;
+                        $student['rows'][$s][$side.'Points'] = ($crow[$side.'Points'] ?? 0);
+                        $matched[$c][$side] = true;
 
 						$sumPoints += ($crow[$side.'Points'] ?? 0);
 						$sumMatches++;
@@ -750,6 +750,7 @@ class assAccountingQuestionPart
 		}
 
 		// the total points for this part will not be negative
+        $this->working_data['record'] = $student;
 		$this->working_data['sumPoints'] = $totalPoints;
 		return $totalPoints;
 	}

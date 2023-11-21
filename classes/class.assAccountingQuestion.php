@@ -1359,7 +1359,10 @@ class assAccountingQuestion extends assQuestion
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(0) . $startrow, $this->plugin->txt($this->getQuestionType()));
         $worksheet->setFormattedExcelTitle($worksheet->getColumnCoord(1) . $startrow, $this->getTitle());
 
-		$solution = $this->getSolutionStored($active_id, $pass, true);
+        $varsolution = $this->getSolutionStored($active_id, $pass, true);
+        $this->initVariablesFromUserSolution($varsolution);
+
+        $solution = $this->getSolutionStored($active_id, $pass, true);
 		$solutionParts = $this->getSolutionParts($solution);
 
 		$row = $startrow + 1;
@@ -1372,7 +1375,7 @@ class assAccountingQuestion extends assQuestion
             $worksheet->setBold($worksheet->getColumnCoord(0) . $row);
 
 			// the excel fields can be filled from the stored input
-			$part_obj->setWorkingXML($solutionParts[$part_id]);
+			$part_obj->setWorkingXML($solutionParts[$part_id] ?? '');
 			$part_obj->calculateReachedPoints();
 			$data = $part_obj->getWorkingData();
 

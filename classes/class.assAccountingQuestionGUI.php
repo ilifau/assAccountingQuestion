@@ -917,7 +917,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				{
 					// use the reached points that are calculated from analyzing the working data
 					$template->setVariable('TXT_SCORE', $this->plugin->txt('reached_score') . ': ');
-					$template->setVariable('SCORE', $table_data["sumPoints"]);
+					$template->setVariable('SCORE', $table_data["sumPoints"] ?? 0);
 				}
 			}
 
