@@ -1,22 +1,24 @@
 ILIAS Accounting Question plugin
 ================================
 
-Copyright (c) 2018 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
+Copyright (c) 2023 Institut fuer Lern-Innovation, Friedrich-Alexander-Universitaet Erlangen-Nuernberg,  GPLv2, see LICENSE 
 
 - Author: Fred Neumann <fred.neumann@ili.fau.de>, Jesus Copado <jesus.copado@ili.fau.de>
 - Forum: http://www.ilias.de/docu/goto_docu_frm_3474_1944.html
 - Bug Reports: http://www.ilias.de/mantis (Choose project "ILIAS plugins" and filter by category "Accounting Question")
 
-Installation
-------------
+Installation / Update
+---------------------
 When you download the Plugin as ZIP file from GitHub, please rename the extracted directory to *assAccountingQuestion* (remove the branch suffix, e.g. -master).
 
 1. Copy the assAccountingQuestion directory to your ILIAS installation at the following path 
 (create subdirectories, if neccessary):
 Customizing/global/plugins/Modules/TestQuestionPool/Questions/
-2. Go to Administration > Plugins
-3. Choose "Update" for the assAccountingQuestion plugin
-4. Choose "Activate" for the assAccountingQuestion plugin
+2. Run `composer install --no-dev` in the main directory of your ILIAS installation
+3. Run the ILIAS setup in the main directory of your ILIAS installation
+4. Go to Administration > Plugins
+5. Choose "Install" for the assAccountingQuestion plugin
+6. Choose "Activate" for the assAccountingQuestion plugin
 
 There is nothing to configure for this plugin.
 
@@ -28,12 +30,13 @@ See [Anleitung](docs/Anleitung-Deutsch.pdf) or [Manual](docs/Manual-English.pdf)
 
 Version History
 ===============
+* Version 1.21 for ILIAS 8.6+ is maintained in https://github.com/ilifau/assAccountingQuestion/tree/main-ilias8
 * Version 1.20 for ILIAS 7.11+ is maintained in https://github.com/ilifau/assAccountingQuestion/tree/main-ilias7
 * Version 1.10 for ILIAS 7.0 to 7.9 is available with tag https://github.com/ilifau/assAccountingQuestion/tree/1.10.0
-* Version 1.9 for ILIAS 6 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias6
-* Version 1.8 for ILIAS 5.4 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias54
-* Version 1.7 for ILIAS 5.3 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master-ilias53
-* Version 1.5 for ILIAS 5.2 is maintained in https://github.com/ilifau/assAccountingQuestion/tree/master52+
+
+Version 1.21.0 (2023-11.21)
+---------------------------
+* Update for ILIAS 8.6
 
 Version 1.20.0 (2022-09-20)
 --------------------------
