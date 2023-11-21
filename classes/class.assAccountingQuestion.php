@@ -947,15 +947,15 @@ class assAccountingQuestion extends assQuestion
 				$prefix = 'q_' . $this->getId() . '_part_' .$part_id . '_row_' . $row .'_';
 
 				$xml .= '<row ';
-				$xml .= 'rightValueMoney="' . ($_POST[$prefix.'amount_right'] ?? '') . '" ';
-				$xml .= 'leftValueMoney="' . ($_POST[$prefix.'amount_left'] ?? '') . '" ';
-				$xml .= 'rightValueRaw="' . ($_POST[$prefix.'amount_right'] ?? '') . '" ';
-				$xml .= 'leftValueRaw="' . ($_POST[$prefix.'amount_left'] ?? '') . '" ';
-				$xml .= 'rightAccountNum="' . ($_POST[$prefix.'account_right'] ?? '') . '" ';
-				$xml .= 'leftAccountNum="' . ($_POST[$prefix.'account_left'] ?? '') . '" ';
-				$xml .= 'rightAccountRaw="' . $this->getAccountText($_POST[$prefix.'account_right'] ?? '') . '" ';
-				$xml .= 'leftAccountRaw="' . $this->getAccountText($_POST[$prefix.'account_left'] ?? '') . '"/> ';
-			}
+				$xml .= 'rightValueMoney="' . $this->plugin->request()->getString($prefix.'amount_right') . '" ';
+                $xml .= 'leftValueMoney="' . $this->plugin->request()->getString($prefix.'amount_left') . '" ';
+                $xml .= 'rightValueRaw="' . $this->plugin->request()->getString($prefix.'amount_right') . '" ';
+				$xml .= 'leftValueRaw="' . $this->plugin->request()->getString($prefix.'amount_left') . '" ';
+				$xml .= 'rightAccountNum="' . $this->plugin->request()->getString($prefix.'account_right') . '" ';
+				$xml .= 'leftAccountNum="' . $this->plugin->request()->getString($prefix.'account_left') . '" ';
+				$xml .= 'rightAccountRaw="' . $this->getAccountText($this->plugin->request()->getString($prefix.'account_right')) . '" ';
+				$xml .= 'leftAccountRaw="' . $this->getAccountText($this->plugin->request()->getString($prefix.'account_left')) . '"/> ';
+            }
 			$xml .= '</input>';
 
             $inputs[] = $xml;

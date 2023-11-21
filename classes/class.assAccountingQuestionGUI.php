@@ -126,7 +126,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	protected function deletePart()
 	{
-		if ($this->object->deletePart($_GET['part_id'])) {
+		if ($this->object->deletePart($this->plugin->request()->getInt('part_id'))) {
             $this->tpl->setOnScreenMessage('success', $this->plugin->txt('part_deleted'), true);
 		} else {
             $this->tpl->setOnScreenMessage('failure', $this->plugin->txt('part_not_deleted'), true);
@@ -399,10 +399,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			$this->writeQuestionGenericPostData();
 
 			// get the accounts definition either by file upload or post
-			if (file_exists($_FILES["accounts_file"]["tmp_name"])) {
-				$accounts_xml = file_get_contents($_FILES["accounts_file"]["tmp_name"]);
+            if ($this->plugin->request()->hasFile('accounts_file')) {
+				$accounts_xml = $this->plugin->request()->getFileContent('accounts_file');
 			} else {
-				$accounts_xml = ilUtil::stripOnlySlashes($_POST['accounts_xml']);
+				$accounts_xml = $this->plugin->request()->getXml('accounts_xml');
 			}
 
 			// check the accounts definition but save it anyway
@@ -411,10 +411,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
 			}
 
             // get the variables definition either by file upload or post
-            if (file_exists($_FILES["variables_file"]["tmp_name"])) {
-                $variables_xml = file_get_contents($_FILES["variables_file"]["tmp_name"]);
+            if ($this->plugin->request()->hasFile('variables_file')) {
+                $variables_xml = $this->plugin->request()->getFileContent('variables_file');
             } else {
-                $variables_xml = ilUtil::stripOnlySlashes($_POST['variables_xml']);
+                $variables_xml = $this->plugin->request()->getXml('variables_xml');
             }
 
             // check the variables XML but save it anyway
@@ -428,18 +428,18 @@ class assAccountingQuestionGUI extends assQuestionGUI
             }
 
             // calculation tolerance
-            $this->object->setPrecision($_POST['precision']);
-            $this->object->setLifecycle(ilAssQuestionLifecycle::getInstance($_POST['lifecycle']));
+            $this->object->setPrecision($this->plugin->request()->getInt('precision'));
+            $this->object->setLifecycle(ilAssQuestionLifecycle::getInstance($this->plugin->request()->getString('lifecycle')));
 
             // thousands delimiter type
             if ($this->plugin->getConfig()->thousands_delim_per_question) {
-                $this->object->setThousandsDelimType($_POST['thousands_delim_type']);
+                $this->object->setThousandsDelimType($this->plugin->request()->getString('thousands_delim_type'));
             }
 
 			// sort the part positions
 			$positions = array();
-			foreach ($_POST['parts'] as $part_id) {
-				$positions[$part_id] = $_POST['position_' . $part_id];
+			foreach ($this->plugin->request()->getIntArray('parts') as $part_id) {
+				$positions[$part_id] = $this->plugin->request()->getString('position_' . $part_id);
 			}
 			asort($positions, SORT_NUMERIC);
 
@@ -459,10 +459,10 @@ class assAccountingQuestionGUI extends assQuestionGUI
 				$part_obj = $this->object->getPart($part_id);
 				$part_obj->setText($this->form->getInput('text_' . $part_id));
 				$part_obj->setPosition($pos);
-				if ($_FILES["booking_file_" . $part_id]["tmp_name"]) {
-					$booking_xml = file_get_contents($_FILES["booking_file_" . $part_id]["tmp_name"]);
+				if ($this->plugin->request()->hasFile('booking_file_' . $part_id)) {
+					$booking_xml = $this->plugin->request()->getFileContent('booking_file_'. $part_id);
 				} else {
-					$booking_xml = ilUtil::stripOnlySlashes($_POST['booking_xml_' . $part_id]);
+					$booking_xml =  $this->plugin->request()->getXml('booking_xml_' . $part_id);
 				}
 
 				// check the booking definition but save it anyway
@@ -496,7 +496,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 	 */
 	protected function downloadXml()
 	{
-		switch ($_GET['xmltype']) {
+		switch ($this->plugin->request()->getString('xmltype')) {
 			case 'accounts':
 				$file = $this->object->getAccountsXML();
 				$filename = 'accounts' . $this->object->getId() . '.xml';
@@ -836,7 +836,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		if ($ilCtrl->getCmd() == 'print'
 			and ($ilCtrl->getCmdClass() == 'ilobjquestionpoolgui' or $ilCtrl->getCmdClass() == 'ilobjtestgui'))
 		{
-			switch ($_POST['output'])
+			switch ($this->plugin->request()->getString('output'))  
 			{
 				case 'detailed':
 					$show_correct_solution = true;
@@ -858,7 +858,7 @@ class assAccountingQuestionGUI extends assQuestionGUI
 		{
 			$show_grading_details = true;
 		}
-		elseif ($ilAccess->checkAccess('write', '',  $this->request->getRefId()))
+		elseif ($ilAccess->checkAccess('write', '',  $this->plugin->request()->getInt('ref_id')))
 		{
 			$show_grading_details = true;
 			$grading_details_note = $this->plugin->txt('grading_details_note');

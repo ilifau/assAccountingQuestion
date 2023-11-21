@@ -4,6 +4,8 @@
  * GPLv2, see LICENSE 
  */
 
+use ILIAS\TestQuestionPool\InternalRequestService;
+
 /**
 * Accounting Question plugin
 *
@@ -13,6 +15,9 @@
 */
 class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
 {
+    protected ?assAccountingQuestionRequest $request;
+    
+    
     final function getPluginName() : string
     {
         return "assAccountingQuestion";
@@ -39,6 +44,22 @@ class ilassAccountingQuestionPlugin extends ilQuestionsPlugin
         return true;
     }
 
+    /**
+     * Get the request handler
+     * (may move to a local dic in the future)
+     */
+    public function request() : assAccountingQuestionRequest
+    {
+        global $DIC;
+        if (!isset($this->request)) {
+            $this->request = new assAccountingQuestionRequest(
+                $DIC->http(),
+                $DIC->refinery(),
+                $DIC->upload()
+            );
+        }
+        return $this->request;
+    }
 
     /**
      * Get the global configuration
